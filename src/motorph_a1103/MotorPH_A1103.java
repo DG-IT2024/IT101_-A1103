@@ -1,11 +1,12 @@
 /*Notes:
+Separate time entries with comma
+Write Time In followed by Timeout.
+Time should follow HH:MM format.
+
 Time in 12:00 to 13:00. no counted
 Time in before 8:00. credited as regular paid hour
 Maximum regular paid hours is 8hours
-Separate time entries with comma
-Write Time In followed by Timeout.
-Time should follow HH:MM format
-overtime pay consideration: 25% of the regular hourly rate
+Overtime pay consideration: 25% more of the regular hourly rate
 Deductions and benefits will only be considered as part of the end-the-month payroll
 No need to put timeIn, TimeOut for absent
 
@@ -25,19 +26,21 @@ public class MotorPH_A1103 {
             System.out.println("\nEnter Employee Number:");
             String employeeNumber = entry.nextLine();
             int employeeNumber_ = Integer.parseInt(employeeNumber);
-
-            System.out.println("\nEnter multiple Time-In and Time-out:\n(format: HH:MM,HH:MM. Type P to process)");
+            
+            int[] validEmployeeNumbers = employeeNumberDatabase();
+            
+            
+            System.out.println("Enter multiple Time-In and Time-out:(format: HH:MM,HH:MM). Type P to process");
 
             ArrayList<String> inputs = new ArrayList<>();
-
             while (true) {
-                String inputline = entry.nextLine(); //before "\n" newline charter
-                if (inputline.equalsIgnoreCase("p")) { // equalsIgnoreCase ignores the case (uppercase or lowercase) of "done"
-                    processData(employeeNumber, employeeNumber_, inputs);
+                String inputline = entry.nextLine();
+                if (inputline.equalsIgnoreCase("p")) { // equalsIgnoreCase ignores the case (uppercase or lowercase) of "p"
+                    processData(employeeNumber_, inputs);
                     System.out.println("");
                     break;
-
                 }
+
                 if (!inputline.isEmpty()) { // to ensure that there are no blank entry or accidentally pressing of enter
                     String[] elements = inputline.split(",");// Split input by delimiter ","
                     for (String element : elements) {
@@ -47,12 +50,13 @@ public class MotorPH_A1103 {
 
             }
 
-            System.out.println("\nDo you want to clear the console? (Y/N)");
+            System.out.println("\nDo you want to clear the terminal? (Y/N)");
             String response1 = entry.nextLine();
             if (response1.equalsIgnoreCase("y")) {
                 System.out.println("\033c");
                 System.out.println("Terminal Cleared");
             }
+
             System.out.println("\nDo you want to process another  payroll? (Y/N)");
             String response2 = entry.nextLine();
 
@@ -64,13 +68,13 @@ public class MotorPH_A1103 {
         }
     }
 
-    public static void processData(String employeeNumber, int employeeNumber_, ArrayList<String> inputs) {
+    public static void processData(int employeeNumber_, ArrayList<String> inputs) {
+
         int coveredDays;
         coveredDays = 26; //Set to maximum workings day in a month
 
-        //determine the values of each variable
         int index_;
-        index_ = employeeNumber_ - 1;
+        index_ = employeeNumber_ - 1; //determine the values of each variable
 
         //Employee Information   
         String employeePosition_;
@@ -108,19 +112,19 @@ public class MotorPH_A1103 {
         for (int i = 0; i < timeIn.size(); i++) {
             dailyWorkedHours.add(calculateWorkedHours(timeIn.get(i), timeOut.get(i)));
         }
-        
-        int maxRegularHours;
-        maxRegularHours = 8; // Maximum paid regular hours : 8
-        
-        int regularWorkedHour;
-        regularWorkedHour = regularWorkedHoursComputation(dailyWorkedHours, maxRegularHours);
 
+        // Determine Regular Working Hours and Overtime HOurs
+        int maxRegularHours;
+        int regularWorkedHour;
         int overtimeHour;
+
+        maxRegularHours = 8; // Maximum paid regular hours : 8
+        regularWorkedHour = regularWorkedHoursComputation(dailyWorkedHours, maxRegularHours);
         overtimeHour = overtimeComputation(dailyWorkedHours, maxRegularHours);
 
         // Computation of Earnings
         double dailyRateCutoff;
-        double hourlyRateCutoff; //regular hours per day 
+        double hourlyRateCutoff;
         double grossIncome;
         double overtimePay;
         double overtimeRate;
@@ -128,10 +132,11 @@ public class MotorPH_A1103 {
         int numWorkedDays;
 
         dailyRateCutoff = basicSalary / coveredDays;
-        hourlyRateCutoff = dailyRateCutoff / maxRegularHours; 
+        hourlyRateCutoff = dailyRateCutoff / maxRegularHours;
         overtimeRate = 1.25; //set overtime pay rate to 25% of the hourlyRate
         overtimePay = overtimeHour * overtimeRate * hourlyRateCutoff;
         grossIncome = hourlyRateCutoff * regularWorkedHour + overtimePay;
+
         //Government Deductions (SSS, PhilHealth, Pagibig)
         double sssDeduction;
         double philHealthDeduction;
@@ -150,18 +155,19 @@ public class MotorPH_A1103 {
         taxableMonthlyPay = netMonthPay;
         withHoldingTax = calculateWithholdingTax(taxableMonthlyPay);
         totalDeduction = withHoldingTax + benefitDeduction;
-
         takeHomePay = grossIncome - totalDeduction + totalBenefits;
         numWorkedDays = timeSheet.size() / 2;
 
-        // Print Personal Information Section
+        //Print PaySlip
         int printOutWidth = 55;
+
+        // Print Personal Information Section
         System.out.printf("%" + (55 + "EMPLOYEE PAYSLIP".length()) / 2 + "s%n", "EMPLOYEE PAYSLIP");
         System.out.println("-".repeat(printOutWidth));
         System.out.println("EMPLOYEE INFORMATION:");
         System.out.printf("%-30s: %s, %s%n", "Name", lastName, firstName);
         System.out.printf("%-30s: %s%n", "Employee Position/ Department", employeePosition_);
-        System.out.printf("%-30s: %s%n", "Employee Number", employeeNumber);
+        System.out.printf("%-30s: %d%n", "Employee Number", employeeNumber_);
         System.out.printf("%-30s: %s%n", "Cut-off Covered Days", coveredDays);
 
         // Print Earnings Section
@@ -193,9 +199,7 @@ public class MotorPH_A1103 {
         System.out.printf("%-30s: P%,.2f%n", "Gross Income", grossIncome);
         System.out.printf("%-30s: P%,.2f%n", "Total Benefits", totalBenefits);
         System.out.printf("%-30s: P%,.2f%n", "Total Deduction", totalDeduction);
-//System.out.printf("%-30s: P%,.2f%n", "Pay Adjustments", payAdjustments);
         System.out.printf("%-30s: P%,.2f%n", "Take-Home Pay", takeHomePay);
-
     }
 
     public static ArrayList<String> extractTimeIn(ArrayList<String> timeSheet) {
@@ -261,7 +265,7 @@ public class MotorPH_A1103 {
             breakTime = 1;
         }
 
-       int workedHour_ = workedHour - breakTime;
+        int workedHour_ = workedHour - breakTime;
 
         return workedHour_;
 
@@ -274,6 +278,7 @@ public class MotorPH_A1103 {
             66667,
             166667,
             666667,};
+
         double[] BIRTaxRate = {0,
             0.2 * (taxableMonthlyPay - BIRincomeThresholds[0]),
             2500 + 0.25 * (taxableMonthlyPay - BIRincomeThresholds[1]),
@@ -282,6 +287,7 @@ public class MotorPH_A1103 {
             200833.33 + 0.35 * (taxableMonthlyPay - BIRincomeThresholds[4]),};
 
         double whTax = 0;
+
         for (int i = 0; i < BIRincomeThresholds.length; i++) {
             if (taxableMonthlyPay < BIRincomeThresholds[i]) {
                 whTax = BIRTaxRate[i];
@@ -327,9 +333,9 @@ public class MotorPH_A1103 {
         double pagIBIG = 0;
 
         if (basicSalary >= 1000 && basicSalary <= 1500) {
-            pagIBIG = basicSalary * 0.02;
-        } else if (basicSalary > 1500) {
             pagIBIG = basicSalary * 0.01;
+        } else if (basicSalary > 1500) {
+            pagIBIG = basicSalary * 0.02;
         }
 
         double maxContribution = 100.0; // ( need to verify) set max pag-ibig contribution to 100 
@@ -432,14 +438,13 @@ public class MotorPH_A1103 {
         return employeeName;
     }
 
-    public static int employeeNumberDatabase(int index_) {
+    public static int[] employeeNumberDatabase() {
         int[] employeeNumber = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
             11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
             21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
             31, 32, 33, 34};
 
-        int employeeNumber_ = employeeNumber[index_];
-        return employeeNumber_;
+        return employeeNumber;
     }
 
     public static double basicSalaryDatabase(int index_) {
@@ -524,8 +529,8 @@ public class MotorPH_A1103 {
         return employeePosition_;
 
     }
-    
-   public static Integer regularWorkedHoursComputation(ArrayList< Integer> dailyWorkedHours, Integer maxRegularHours) {
+
+    public static Integer regularWorkedHoursComputation(ArrayList< Integer> dailyWorkedHours, Integer maxRegularHours) {
         ArrayList<Integer> dailyRegularHour = new ArrayList<>();
 
         int totalRegularHour = 0;
