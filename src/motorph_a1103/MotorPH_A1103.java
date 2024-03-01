@@ -27,9 +27,6 @@ public class MotorPH_A1103 {
             String employeeNumber = entry.nextLine();
             int employeeNumber_ = Integer.parseInt(employeeNumber);
             
-            int[] validEmployeeNumbers = employeeNumberDatabase();
-            
-            
             System.out.println("Enter multiple Time-In and Time-out:(format: HH:MM,HH:MM). Type P to process");
 
             ArrayList<String> inputs = new ArrayList<>();
