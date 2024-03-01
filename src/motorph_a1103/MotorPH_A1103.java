@@ -1,17 +1,16 @@
-/*
-Notes:
+/*Notes:
 Time in 12:00 to 13:00. no counted
 Time in before 8:00. credited as regular paid hour
 Maximum regular paid hours is 8hours
 Separate time entries with comma
 Write Time In followed by Timeout.
 Time should follow HH:MM format
+overtime pay consideration: 25% of the regular hourly rate
 Deductions and benefits will only be considered as part of the end-the-month payroll
- 
-work on this sheet if employee is wholeday absent
-and consider overtime
+No need to put timeIn, TimeOut for absent
 
  */
+
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.time.LocalTime;
@@ -27,7 +26,7 @@ public class MotorPH_A1103 {
             String employeeNumber = entry.nextLine();
             int employeeNumber_ = Integer.parseInt(employeeNumber);
 
-            System.out.println("Enter multiple Time-In and Time-out:(format: HH:MM,HH:MM). Type P to process");
+            System.out.println("\nEnter multiple Time-In and Time-out:\n(format: HH:MM,HH:MM. Type P to process)");
 
             ArrayList<String> inputs = new ArrayList<>();
 
@@ -97,8 +96,6 @@ public class MotorPH_A1103 {
         clothingAllowance = clothingAllowanceDatabase(index_);
         totalBenefits = riceSubsidy + phoneAllowance + clothingAllowance;
 
-        
-
         //Timesheet
         ArrayList<String> timeSheet = new ArrayList<>(inputs);
 
@@ -111,26 +108,30 @@ public class MotorPH_A1103 {
         for (int i = 0; i < timeIn.size(); i++) {
             dailyWorkedHours.add(calculateWorkedHours(timeIn.get(i), timeOut.get(i)));
         }
+        
+        int maxRegularHours;
+        maxRegularHours = 8; // Maximum paid regular hours : 8
+        
+        int regularWorkedHour;
+        regularWorkedHour = regularWorkedHoursComputation(dailyWorkedHours, maxRegularHours);
 
-        int totalWorked = 0;
-        for (int num : dailyWorkedHours) {
-            totalWorked += num;
-        }
+        int overtimeHour;
+        overtimeHour = overtimeComputation(dailyWorkedHours, maxRegularHours);
 
         // Computation of Earnings
         double dailyRateCutoff;
         double hourlyRateCutoff; //regular hours per day 
         double grossIncome;
-//double overtimePay;
+        double overtimePay;
+        double overtimeRate;
         double takeHomePay;
-//double payAdjustments;
         int numWorkedDays;
-        
-        dailyRateCutoff = basicSalary / coveredDays;
-        hourlyRateCutoff = dailyRateCutoff / 8; //regular hours per day 
-        grossIncome = hourlyRateCutoff * totalWorked;
-//overtimePay = 0; //overtimeHour * overtimeRate * hourlyRateCutoff
 
+        dailyRateCutoff = basicSalary / coveredDays;
+        hourlyRateCutoff = dailyRateCutoff / maxRegularHours; 
+        overtimeRate = 1.25; //set overtime pay rate to 25% of the hourlyRate
+        overtimePay = overtimeHour * overtimeRate * hourlyRateCutoff;
+        grossIncome = hourlyRateCutoff * regularWorkedHour + overtimePay;
         //Government Deductions (SSS, PhilHealth, Pagibig)
         double sssDeduction;
         double philHealthDeduction;
@@ -140,16 +141,16 @@ public class MotorPH_A1103 {
         double withHoldingTax;
         double totalDeduction;
         double taxableMonthlyPay;
-        
+
         sssDeduction = calculateSSSDeduction(basicSalary);
         philHealthDeduction = calculatePhilHealthDeduction(basicSalary);
         pagIbigDeduction = calculatePagIbigDeduction(basicSalary);
         benefitDeduction = sssDeduction + pagIbigDeduction + philHealthDeduction;
         netMonthPay = grossIncome - benefitDeduction;
-        taxableMonthlyPay = netMonthPay ;
+        taxableMonthlyPay = netMonthPay;
         withHoldingTax = calculateWithholdingTax(taxableMonthlyPay);
         totalDeduction = withHoldingTax + benefitDeduction;
-               
+
         takeHomePay = grossIncome - totalDeduction + totalBenefits;
         numWorkedDays = timeSheet.size() / 2;
 
@@ -168,9 +169,8 @@ public class MotorPH_A1103 {
         System.out.printf("%-30s: P%,.2f%n", "Basic Salary", basicSalary);
         System.out.printf("%-30s: P%,.2f%n", "Semi-monthly Rate", grossSemi_monthlyRate);
         System.out.printf("%-30s: %d%n", "Days Worked", numWorkedDays);
-        System.out.printf("%-30s: %d%n", "Hours Worked ", totalWorked);
-//System.out.printf("%-30s: P%,.2f%n", "Overtime Hour", "");
-//System.out.printf("%-30s: P%,.2f%n", "Overtime Pay", overtimePay);
+        System.out.printf("%-30s: %d%n", "Hours Worked ", regularWorkedHour);
+        System.out.printf("%-30s: %d%n", "Overtime Hour", overtimeHour);
         System.out.printf("%-30s: P%,.2f%n", "Gross Income", grossIncome);
 
         // Print Deductions Section
@@ -261,10 +261,7 @@ public class MotorPH_A1103 {
             breakTime = 1;
         }
 
-        int worked_ = workedHour - breakTime;
-
-        int maxHour = 8; // set maximum paid regular hour  
-        int workedHour_ = Math.min(worked_, maxHour);
+       int workedHour_ = workedHour - breakTime;
 
         return workedHour_;
 
@@ -483,18 +480,6 @@ public class MotorPH_A1103 {
         return riceSubsidy;
     }
 
-    public static double hourlyRateDatabase(int index_) {
-        // hourly Rate based on search criteria
-        double[] hourlyRate = {535.71, 357.14, 357.14, 357.14, 313.51, 313.51, 255.80, 133.93, 133.93,
-            313.51, 302.53, 229.02, 142.86, 142.86, 318.45, 255.80, 249.11, 133.93,
-            133.93, 138.39, 138.39, 142.86, 133.93, 133.93, 142.86, 147.32, 147.32,
-            142.86, 133.93, 133.93, 133.93, 313.51, 313.51, 313.51};
-
-        double hourlyRate_ = hourlyRate[index_];
-
-        return hourlyRate_;
-    }
-
     public static String employeePosition(int index_) {
 
         String[] employeePosition = {
@@ -539,4 +524,37 @@ public class MotorPH_A1103 {
         return employeePosition_;
 
     }
+    
+   public static Integer regularWorkedHoursComputation(ArrayList< Integer> dailyWorkedHours, Integer maxRegularHours) {
+        ArrayList<Integer> dailyRegularHour = new ArrayList<>();
+
+        int totalRegularHour = 0;
+
+        for (int i = 0; i < dailyWorkedHours.size(); i++) {
+            int dailyRegular = Math.min(dailyWorkedHours.get(i), maxRegularHours);
+            dailyRegularHour.add(dailyRegular);
+            totalRegularHour += dailyRegular;
+        }
+        return totalRegularHour;
+    }
+
+    public static Integer overtimeComputation(ArrayList< Integer> dailyWorkedHours, Integer maxRegularHours) {
+        ArrayList<Integer> dailyOvertimeHour = new ArrayList<>();
+
+        int totalOvertimeHour = 0;
+
+        for (int i = 0; i < dailyWorkedHours.size(); i++) {
+            int dailyOvertime = dailyWorkedHours.get(i) - maxRegularHours;
+            if (dailyOvertime > 0) {
+                dailyOvertimeHour.add(dailyOvertime);
+                totalOvertimeHour += dailyOvertime;
+            } else {
+                dailyOvertime = 0;
+                dailyOvertimeHour.add(dailyOvertime);
+            }
+        }
+
+        return totalOvertimeHour;
+    }
+
 }
