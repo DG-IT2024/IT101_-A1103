@@ -11,7 +11,7 @@ GrossIncome(actual pay) is used to determine the SSS, PhilHealth, Pag-ibig deduc
 Overtime is only counted if employee works for more than 8hours
 Overtime pay consideration: 25% more of the regular hourly rate.
 This program computes for one month payroll. 
-Working days is 26days. 
+Working days is 26days. typical (Monday to Saturday)
 No need to put timeIn, TimeOut for absent
  
  */
@@ -68,11 +68,8 @@ public class MotorPH_A1103 {
         }
 
     }
-    
+       
     public static void processData(int employeeNumber_, ArrayList<String> inputs) {
-
-        int coveredDays;
-        coveredDays = 26; //Set to maximum workings day in a month
 
         int index_;
         index_ = employeeNumber_ - 1; //determine the values of each variable
@@ -131,7 +128,9 @@ public class MotorPH_A1103 {
         double overtimeRate;
         double takeHomePay;
         int numWorkedDays;
+        int coveredDays;
 
+        coveredDays = 26; //Set to maximum workings day in a month
         dailyRateCutoff = basicSalary / coveredDays;
         hourlyRateCutoff = dailyRateCutoff / maxRegularHours;
         overtimeRate = 1.25; //set overtime pay rate to 25% of the hourlyRate
@@ -148,7 +147,7 @@ public class MotorPH_A1103 {
         double totalDeduction;
         double taxableMonthlyPay;
         double basis;
-        
+
         basis = basicSalary;
         sssDeduction = calculateSSS(basis);
         philHealthDeduction = calculatePhilHealth(basis);
@@ -161,10 +160,63 @@ public class MotorPH_A1103 {
         takeHomePay = grossIncome - totalDeduction + totalBenefits;
         numWorkedDays = timeSheet.size() / 2;
 
-        //Print PaySlip
-        int printOutWidth = 55;
+        //print employee information
+        String birthday;
+        String address;
+        String phoneNumber;
+        String sssNumber;
+        String philhealthNo;
+        String tinNo;
+        String pagibig;
+        String status;
+        String position;
+        String immediateSupervisor;
+        double grossSemiMonthlyRate;
+        double hourlyRate;
 
+        index_ = employeeNumber_;
+        birthday = birthdayDB(index_);
+        address = addressDB(index_);
+        phoneNumber = phoneNumberDB(index_);
+        sssNumber = sssNumberDB(index_);
+        philhealthNo = philhealthNoDB(index_);
+        tinNo = tinNoDB(index_);
+        pagibig = pagibigDB(index_);
+        status = employeeStatusDB(index_);
+        position = employeePositionDB(index_);
+        immediateSupervisor = immediateSupervisorsDB(index_);
+        basicSalary = basicSalaryDB(index_);
+        riceSubsidy = riceSubsidyDB(index_);
+        phoneAllowance = phoneAllowanceDB(index_);
+        clothingAllowance = clothingAllowanceDB(index_);
+        grossSemiMonthlyRate = basicSalary / 2;
+        hourlyRate = basicSalary / coveredDays;
+
+        int printOutWidth = 55;
         // Print Personal Information Section
+        System.out.printf("%" + (55 + "EMPLOYEE DETAILS".length()) / 2,"EMPLOYEE DETAILS" );
+        System.out.println("-".repeat(printOutWidth));
+        System.out.printf("%-30s: %s%n", "Employee #", employeeNumber_);
+        System.out.printf("%-30s: %s%n", "Last Name", lastName);
+        System.out.printf("%-30s: %s%n", "First Name", firstName);
+        System.out.printf("%-30s: %s%n", "Birthday", birthday);
+        System.out.printf("%-30s: %s%n", "Address", address);
+        System.out.printf("%-30s: %s%n", "Phone Number", phoneNumber);
+        System.out.printf("%-30s: %s%n", "SSS Number", sssNumber);
+        System.out.printf("%-30s: %s%n", "Philhealth Number", philhealthNo);
+        System.out.printf("%-30s: %s%n", "TIN Number", tinNo);
+        System.out.printf("%-30s: %s%n", "Pag-ibig Number", pagibig);
+        System.out.printf("%-30s: %s%n", "Status", status);
+        System.out.printf("%-30s: %s%n", "Position", position);
+        System.out.printf("%-30s: %s%n", "Immediate Supervisor", immediateSupervisor);
+        System.out.printf("%-30s: %.2f%n", "Basic Salary", basicSalary);
+        System.out.printf("%-30s: %.2f%n", "Rice Subsidy", riceSubsidy);
+        System.out.printf("%-30s: %.2f%n", "Phone Allowance", phoneAllowance);
+        System.out.printf("%-30s: %.2f%n", "Clothing Allowance", clothingAllowance);
+        System.out.printf("%-30s: %.2f%n", "Gross Semi-monthly Rate", grossSemiMonthlyRate);
+        System.out.printf("%-30s: %.2f%n", "Hourly Rate", hourlyRate);
+
+        //Print PaySlip
         System.out.printf("%" + (55 + "EMPLOYEE PAYSLIP".length()) / 2 + "s%n", "EMPLOYEE PAYSLIP");
         System.out.println("-".repeat(printOutWidth));
         System.out.println("EMPLOYEE INFORMATION:");
@@ -203,6 +255,7 @@ public class MotorPH_A1103 {
         System.out.printf("%-30s: P%,.2f%n", "Total Benefits", totalBenefits);
         System.out.printf("%-30s: P%,.2f%n", "Total Deduction", totalDeduction);
         System.out.printf("%-30s: P%,.2f%n", "Take-Home Pay", takeHomePay);
+
     }
 
     public static ArrayList<String> extractTimeIn(ArrayList<String> timeSheet) {
@@ -273,7 +326,7 @@ public class MotorPH_A1103 {
         return workedHour_;
 
     }
-    
+
     public static Integer regularWorkedHoursComputation(ArrayList< Integer> dailyWorkedHours, Integer maxRegularHours) {
         ArrayList<Integer> dailyRegularHour = new ArrayList<>();
 
@@ -353,7 +406,7 @@ public class MotorPH_A1103 {
         // determine SSS deduction
         double SSS_ = 0;
         for (int i = 0; i < 44; i++) {
-            if (basis< sssSalary.get(i)) {
+            if (basis < sssSalary.get(i)) {
                 SSS_ = sssContribution.get(i);
                 break;
             } else {
@@ -576,8 +629,10 @@ public class MotorPH_A1103 {
             "12/18/1970", "08/28/1986", "12/12/1981", "08/20/1978", "04/14/1973",
             "01/27/1989", "02/09/1992", "11/16/1990", "08/07/1990"
         };
-        
-        return null;
+
+        String birthdayDB_ = birthdayDB[index_];
+
+        return birthdayDB_;
 
     }
 
@@ -619,7 +674,9 @@ public class MotorPH_A1103 {
             "Bulala, Camalaniugan",
             "Agapita Building, Metro Manila"
         };
-        return null;
+        String addressDB_ = addressDB[index_];
+
+        return addressDB_;
     }
 
     public static String phoneNumberDB(int index_) {
@@ -632,7 +689,9 @@ public class MotorPH_A1103 {
             "512-899-876", "948-628-136", "332-372-215", "250-700-389", "973-358-041",
             "529-705-439", "332-424-955", "078-854-208", "526-639-511"
         };
-        return null;
+        String phoneNumberDB_ = phoneNumberDB[index_];
+
+        return phoneNumberDB_;
     }
 
     public static String sssNumberDB(int index_) {
@@ -645,8 +704,9 @@ public class MotorPH_A1103 {
             "40-9504657-8", "45-3298166-4", "40-2400719-4", "60-1152206-4", "54-1331005-0",
             "52-1859253-1", "26-7145133-4", "11-5062972-7", "20-2987501-5"
         };
+        String sssNumberDB_ = sssNumberDB[index_];
 
-        return null;
+        return sssNumberDB_;
     }
 
     public static String philhealthNoDB(int index_) {
@@ -659,11 +719,13 @@ public class MotorPH_A1103 {
             "797639382265", "810909286264", "934389652994", "351830469744", "465087894112",
             "136451303068", "601644902402", "380685387212", "918460050077"
         };
-        return null;
+        String philhealthNoDB_ = philhealthNoDB[index_];
+
+        return philhealthNoDB_;
     }
 
     public static String pagibigDB(int index_) {
-String[] pagibigNumbers = {
+        String[] pagibigNumbers = {
             "691295330870", "663904995411", "171519773969", "416946776041", "952347222457",
             "441093369646", "210850209964", "211385556888", "260107732354", "799254095212",
             "218002473454", "113071293354", "631130283546", "101205445886", "223057707853",
@@ -672,10 +734,12 @@ String[] pagibigNumbers = {
             "210897095686", "211274476563", "122238077997", "212141893454", "515012579765",
             "110018813465", "697764069311", "993372963726", "874042259378"
         };
-        return null;
+        String pagibigNumbers_ = pagibigNumbers[index_];
+
+        return pagibigNumbers_;
     }
 
-    public static String tinDB(int index_) {
+    public static String tinNoDB(int index_) {
         String[] tinNumbers = {
             "442-605-657-000", "683-102-776-000", "971-711-280-000", "876-809-437-000", "031-702-374-000",
             "317-674-022-000", "672-474-690-000", "888-572-294-000", "604-997-793-000", "525-420-419-000",
@@ -686,28 +750,58 @@ String[] pagibigNumbers = {
             "599-312-588-000", "404-768-309-000", "256-436-296-000", "911-529-713-000"
         };
 
-        return null;
+        String tinNumbers_ = tinNumbers[index_];
 
+        return tinNumbers_;
     }
 
-    public static String employmentStatusDB(int index_) {
-        String[] employmentStatusesDB = {
-            "Regular", "Regular", "Regular", "Regular", "Regular",
-            "Regular", "Regular", "Regular", "Regular", "Regular",
-            "Regular", "Regular", "Regular", "Regular", "Regular",
-            "Regular", "Regular", "Regular", "Regular", "Regular",
-            "Probationary", "Probationary", "Probationary", "Probationary", "Probationary",
-            "Probationary", "Probationary", "Probationary", "Probationary", "Probationary",
-            "Probationary", "Regular", "Regular", "Regular"
+    public static String employeePositionDB(int index_) {
+
+        String[] employeePosition = {
+            "Chief Executive Officer",
+            "Chief Operating Officer",
+            "Chief Finance Officer",
+            "Chief Marketing Officer",
+            "IT Operations and Systems",
+            "HR Manager",
+            "HR Team Leader",
+            "HR Rank and File",
+            "HR Rank and File",
+            "Accounting Head",
+            "Payroll Manager",
+            "Payroll Team Leader",
+            "Payroll Rank and File",
+            "Payroll Rank and File",
+            "Account Manager",
+            "Account Team Leader",
+            "Account Team Leader",
+            "Account Rank and File",
+            "Account Rank and File",
+            "Account Rank and File",
+            "Account Rank and File",
+            "Account Rank and File",
+            "Account Rank and File",
+            "Account Rank and File",
+            "Account Rank and File",
+            "Account Rank and File",
+            "Account Rank and File",
+            "Account Rank and File",
+            "Account Rank and File",
+            "Account Rank and File",
+            "Account Rank and File",
+            "Sales & Marketing",
+            "Supply Chain and Logistics",
+            "Customer Service and Relations"
         };
-        
-        return null;
+
+        String employeePosition_ = employeePosition[index_];
+
+        return employeePosition_;
+
     }
 
-    
-    
     public static String immediateSupervisorsDB(int index_) {
-    String[] immediateSupervisors = {
+        String[] immediateSupervisorsDB = {
             "N/A", "Garcia, Manuel III", "Garcia, Manuel III", "Garcia, Manuel III", "Lim, Antonio",
             "Lim, Antonio", "Villanueva, Andrea Mae", "San, Jose Brad", "San, Jose Brad", "Aquino, Bianca Sofia",
             "Alvaro, Roderick", "Salcedo, Anthony", "Salcedo, Anthony", "Salcedo, Anthony", "Lim, Antonio",
@@ -716,7 +810,24 @@ String[] pagibigNumbers = {
             "De Leon, Selena", "De Leon, Selena", "De Leon, Selena", "De Leon, Selena", "De Leon, Selena",
             "De Leon, Selena", "Reyes, Isabella", "Reyes, Isabella", "Reyes, Isabella"
         };
-    
-    return null;
+
+        String immediateSupervisorsDB_ = immediateSupervisorsDB[index_];
+
+        return immediateSupervisorsDB_;
+    }
+
+    public static String employeeStatusDB(int index_) {
+        String[] employeeStatusDB = {
+            "Regular", "Regular", "Regular", "Regular", "Regular", "Regular", "Regular", "Regular",
+            "Regular", "Regular", "Regular", "Regular", "Regular", "Regular", "Regular", "Regular",
+            "Regular", "Regular", "Regular", "Regular", "Probationary", "Probationary", "Probationary",
+            "Probationary", "Probationary", "Probationary", "Probationary", "Probationary", "Probationary",
+            "Probationary", "Regular", "Regular", "Regular"
+        };
+
+        String employeeStatusDB_ = employeeStatusDB[index_];
+
+        return employeeStatusDB_;
+
     }
 }
