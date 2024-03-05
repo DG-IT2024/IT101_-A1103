@@ -3,13 +3,17 @@ Separate time entries with comma
 Write Time In followed by Timeout.
 Time should follow HH:MM format.
 
+
 Limitations and considerations:
 Time in 12:00 to 13:00. no counted
-Time in before 8:00. credited as regular paid hour
 Maximum regular paid hours is 8hours
-Overtime pay consideration: 25% more of the regular hourly rate
+GrossIncome(actual pay) is used to determine the SSS, PhilHealth, Pag-ibig deductions
+Overtime is only counted if employee works for more than 8hours
+Overtime pay consideration: 25% more of the regular hourly rate.
+This program computes for one month payroll. 
+Working days is 26days. 
 No need to put timeIn, TimeOut for absent
-
+ 
  */
 
 import java.time.LocalTime;
@@ -64,7 +68,7 @@ public class MotorPH_A1103 {
         }
 
     }
-
+    
     public static void processData(int employeeNumber_, ArrayList<String> inputs) {
 
         int coveredDays;
@@ -83,8 +87,8 @@ public class MotorPH_A1103 {
         employeePosition_ = employeePosition(index_);
         lastName = employeeName(index_).get(0);
         firstName = employeeName(index_).get(1);
-        grossSemi_monthlyRate = basicSalaryDatabase(index_) / 2;
-        basicSalary = basicSalaryDatabase(index_);
+        grossSemi_monthlyRate = basicSalaryDB(index_) / 2;
+        basicSalary = basicSalaryDB(index_);
 
         //Benefits
         double riceSubsidy;
@@ -92,9 +96,9 @@ public class MotorPH_A1103 {
         double clothingAllowance;
         double totalBenefits;
 
-        riceSubsidy = riceSubsidyDatabase(index_);
-        phoneAllowance = phoneAllowanceDatabase(index_);
-        clothingAllowance = clothingAllowanceDatabase(index_);
+        riceSubsidy = riceSubsidyDB(index_);
+        phoneAllowance = phoneAllowanceDB(index_);
+        clothingAllowance = clothingAllowanceDB(index_);
         totalBenefits = riceSubsidy + phoneAllowance + clothingAllowance;
 
         //Timesheet
@@ -143,14 +147,16 @@ public class MotorPH_A1103 {
         double withHoldingTax;
         double totalDeduction;
         double taxableMonthlyPay;
-
-        sssDeduction = calculateSSSDeduction(basicSalary);
-        philHealthDeduction = calculatePhilHealthDeduction(basicSalary);
-        pagIbigDeduction = calculatePagIbigDeduction(basicSalary);
+        double basis;
+        
+        basis = basicSalary;
+        sssDeduction = calculateSSS(basis);
+        philHealthDeduction = calculatePhilHealth(basis);
+        pagIbigDeduction = calculatePagIbig(basis);
         benefitDeduction = sssDeduction + pagIbigDeduction + philHealthDeduction;
         netMonthPay = grossIncome - benefitDeduction;
         taxableMonthlyPay = netMonthPay;
-        withHoldingTax = calculateWithholdingTax(taxableMonthlyPay);
+        withHoldingTax = calculateWHTax(taxableMonthlyPay);
         totalDeduction = withHoldingTax + benefitDeduction;
         takeHomePay = grossIncome - totalDeduction + totalBenefits;
         numWorkedDays = timeSheet.size() / 2;
@@ -267,8 +273,40 @@ public class MotorPH_A1103 {
         return workedHour_;
 
     }
+    
+    public static Integer regularWorkedHoursComputation(ArrayList< Integer> dailyWorkedHours, Integer maxRegularHours) {
+        ArrayList<Integer> dailyRegularHour = new ArrayList<>();
 
-    public static double calculateWithholdingTax(double taxableMonthlyPay) {
+        int totalRegularHour = 0;
+
+        for (int i = 0; i < dailyWorkedHours.size(); i++) {
+            int dailyRegular = Math.min(dailyWorkedHours.get(i), maxRegularHours);
+            dailyRegularHour.add(dailyRegular);
+            totalRegularHour += dailyRegular;
+        }
+        return totalRegularHour;
+    }
+
+    public static Integer overtimeComputation(ArrayList< Integer> dailyWorkedHours, Integer maxRegularHours) {
+        ArrayList<Integer> dailyOvertimeHour = new ArrayList<>();
+
+        int totalOvertimeHour = 0;
+
+        for (int i = 0; i < dailyWorkedHours.size(); i++) {
+            int dailyOvertime = dailyWorkedHours.get(i) - maxRegularHours;
+            if (dailyOvertime > 0) {
+                dailyOvertimeHour.add(dailyOvertime);
+                totalOvertimeHour += dailyOvertime;
+            } else {
+                dailyOvertime = 0;
+                dailyOvertimeHour.add(dailyOvertime);
+            }
+        }
+
+        return totalOvertimeHour;
+    }
+
+    public static double calculateWHTax(double taxableMonthlyPay) {
         double[] BIRincomeThresholds = {
             20833,
             33333,
@@ -296,7 +334,7 @@ public class MotorPH_A1103 {
         return whTax;
     }
 
-    public static double calculateSSSDeduction(double basicSalary) {
+    public static double calculateSSS(double basis) {
         ArrayList<Integer> sssSalary = new ArrayList<>();
         ArrayList<Double> sssContribution = new ArrayList<>();
 
@@ -315,7 +353,7 @@ public class MotorPH_A1103 {
         // determine SSS deduction
         double SSS_ = 0;
         for (int i = 0; i < 44; i++) {
-            if (basicSalary < sssSalary.get(i)) {
+            if (basis< sssSalary.get(i)) {
                 SSS_ = sssContribution.get(i);
                 break;
             } else {
@@ -326,13 +364,13 @@ public class MotorPH_A1103 {
         return SSS_;
     }
 
-    public static double calculatePagIbigDeduction(double basicSalary) {
+    public static double calculatePagIbig(double basis) {
         double pagIBIG = 0;
 
-        if (basicSalary >= 1000 && basicSalary <= 1500) {
-            pagIBIG = basicSalary * 0.01;
-        } else if (basicSalary > 1500) {
-            pagIBIG = basicSalary * 0.02;
+        if (basis >= 1000 && basis <= 1500) {
+            pagIBIG = basis * 0.01;
+        } else if (basis > 1500) {
+            pagIBIG = basis * 0.02;
         }
 
         double maxContribution = 100.0; //  set max pag-ibig contribution to 100 
@@ -341,11 +379,11 @@ public class MotorPH_A1103 {
         return pagIBIG_;
     }
 
-    public static double calculatePhilHealthDeduction(double basicSalary) {
-        double philHealth = basicSalary * 0.03 / 2; // Employees contribution half of 3% of basicSalary.2020 mandate
+    public static double calculatePhilHealth(double basis) {
+        double philHealth = basis * 0.03 / 2; // Employees contribution half of 3% of basicSalary.2020 mandate
 
-        int minValue = 300 / 2; // Example minimum value
-        int maxValue = 1800 / 2; // Example maximum value
+        int minValue = 300 / 2; // minimum value
+        int maxValue = 1800 / 2; // maximum value
         double philHealth_;
         philHealth_ = Math.min(Math.max(philHealth, minValue), maxValue);
 
@@ -444,7 +482,7 @@ public class MotorPH_A1103 {
         return employeeNumber;
     }
 
-    public static double basicSalaryDatabase(int index_) {
+    public static double basicSalaryDB(int index_) {
         int[] salaries = {90000, 60000, 60000, 60000, 52670, 52670, 42975, 22500, 22500, 52670,
             50825, 38475, 24000, 24000, 53500, 42975, 41850, 22500, 22500, 23250,
             23250, 24000, 22500, 22500, 24000, 24750, 24750, 24000, 22500, 22500,
@@ -454,7 +492,7 @@ public class MotorPH_A1103 {
         return basicSalary;
     }
 
-    public static double phoneAllowanceDatabase(int index_) {
+    public static double phoneAllowanceDB(int index_) {
         // Phone allowance based on search criteria
         int[] phoneAllowance = {2000, 2000, 2000, 1000, 1000, 800, 500, 500, 1000, 1000,
             800, 500, 500, 1000, 800, 800, 500, 500, 500, 500,
@@ -465,7 +503,7 @@ public class MotorPH_A1103 {
         return phoneAllowance_;
     }
 
-    public static double clothingAllowanceDatabase(int index_) {
+    public static double clothingAllowanceDB(int index_) {
         // Clothing allowance based on search criteria
         int[] clothingAllowance = {1000, 1000, 1000, 1000, 1000, 800, 500, 500, 1000, 1000,
             800, 500, 500, 1000, 800, 800, 500, 500, 500, 500,
@@ -476,7 +514,7 @@ public class MotorPH_A1103 {
         return clothingAllowance_;
     }
 
-    public static double riceSubsidyDatabase(int index_) {
+    public static double riceSubsidyDB(int index_) {
 
         int riceSubsidy = 1500;
         return riceSubsidy;
@@ -525,38 +563,6 @@ public class MotorPH_A1103 {
 
         return employeePosition_;
 
-    }
-
-    public static Integer regularWorkedHoursComputation(ArrayList< Integer> dailyWorkedHours, Integer maxRegularHours) {
-        ArrayList<Integer> dailyRegularHour = new ArrayList<>();
-
-        int totalRegularHour = 0;
-
-        for (int i = 0; i < dailyWorkedHours.size(); i++) {
-            int dailyRegular = Math.min(dailyWorkedHours.get(i), maxRegularHours);
-            dailyRegularHour.add(dailyRegular);
-            totalRegularHour += dailyRegular;
-        }
-        return totalRegularHour;
-    }
-
-    public static Integer overtimeComputation(ArrayList< Integer> dailyWorkedHours, Integer maxRegularHours) {
-        ArrayList<Integer> dailyOvertimeHour = new ArrayList<>();
-
-        int totalOvertimeHour = 0;
-
-        for (int i = 0; i < dailyWorkedHours.size(); i++) {
-            int dailyOvertime = dailyWorkedHours.get(i) - maxRegularHours;
-            if (dailyOvertime > 0) {
-                dailyOvertimeHour.add(dailyOvertime);
-                totalOvertimeHour += dailyOvertime;
-            } else {
-                dailyOvertime = 0;
-                dailyOvertimeHour.add(dailyOvertime);
-            }
-        }
-
-        return totalOvertimeHour;
     }
 
     public static String birthdayDB(int index_) {
