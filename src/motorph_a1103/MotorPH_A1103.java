@@ -7,7 +7,7 @@ Time should follow HH:MM format.
 Limitations and considerations:
 Time in 12:00 to 13:00. no counted
 Maximum regular paid hours is 8hours
-GrossIncome(actual pay) is used to determine the SSS, PhilHealth, Pag-ibig deductions
+GrossIncome(ActualPay) is used to determine the SSS, PhilHealth, Pag-ibig deductions
 Overtime is only counted if employee works for more than 8hours
 Overtime pay consideration: 25% more of the regular hourly rate.
 This program computes for one month payroll. 
@@ -23,25 +23,39 @@ import java.util.Scanner;
 public class MotorPH_A1103 {
 
     public static void main(String[] args) {
+        int coveredDays;
+        coveredDays = 26; //Set to maximum workings day in a month
 
         Scanner entry = new Scanner(System.in);
 
         while (true) {
-            System.out.println("\nEnter Employee Number:");
-            String employeeNumber = entry.nextLine();
-            int employeeNumber_ = Integer.parseInt(employeeNumber);
+            try {
+                //Employee Entry
+                System.out.println("\nEnter Employee Number:");
+                String employeeNumber = entry.nextLine();
+                int employeeNumber_ = Integer.parseInt(employeeNumber);
 
-            System.out.println("Enter multiple Time-In and Time-out:(format: HH:MM,HH:MM). Type P to process");
+                // Validate employee number
+                if (employeeNumber_ > 35 || employeeNumber_ < 0) {
+                    throw new IllegalArgumentException("Invalid Entry.");
 
-            ArrayList<String> inputs = new ArrayList<>();
-            while (true) {
-                String inputline = entry.nextLine();
-                if (inputline.equalsIgnoreCase("p")) { // equalsIgnoreCase ignores the case (uppercase or lowercase) of "p"
-                    processData(employeeNumber_, inputs);
-                    System.out.println("");
-                    break;
                 }
 
+                employeeInformation(employeeNumber_, coveredDays);
+
+                //TimeS
+                System.out.println("\nEnter multiple Time-In and Time-out:(format: HH:MM,HH:MM). Type P to process");
+
+                ArrayList<String> inputs = new ArrayList<>();
+
+                while (true) {
+                String inputline = entry.nextLine(); //before "\n" newline charter
+                if (inputline.equalsIgnoreCase("p")) { // equalsIgnoreCase ignores the case (uppercase or lowercase) of "done"
+                    processData(employeeNumber_, inputs, coveredDays);
+                    System.out.println("");
+                    break;
+                    
+                }
                 if (!inputline.isEmpty()) { // to ensure that there are no blank entry or accidentally pressing of enter
                     String[] elements = inputline.split(",");// Split input by delimiter ","
                     for (String element : elements) {
@@ -49,27 +63,101 @@ public class MotorPH_A1103 {
                     }
                 }
 
-            }
+            }              
+                
+                System.out.println("\nDo you want to clear the terminal? (Y/N)");
+                String response1 = entry.nextLine();
+                if (response1.equalsIgnoreCase("y")) {
+                    System.out.println("\033c"); // remove all the prior text (tested on command prompt)
+                    clearTerminal(); //generates nextline to hide the text
+                    System.out.println("Terminal Cleared");
+                }
 
-            System.out.println("\nDo you want to clear the terminal? (Y/N)");
-            String response1 = entry.nextLine();
-            if (response1.equalsIgnoreCase("y")) {
-                System.out.println("\033c");
-                System.out.println("Terminal Cleared");
-            }
+                System.out.println("\nDo you want to process another  payroll? (Y/N)");
+                String response2 = entry.nextLine();
 
-            System.out.println("\nDo you want to process another  payroll? (Y/N)");
-            String response2 = entry.nextLine();
-
-            if (!response2.equalsIgnoreCase("y")) {
-                System.out.print("Terminating Program...");
-                break;
+                if (!response2.equalsIgnoreCase("y")) {
+                    System.out.print("Terminating Program...");
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Invalid Entry. Please enter a valid Employee Number.");
+            } catch (Exception e) {
+                System.out.println("Error: " + e.getMessage());
             }
         }
+    }
+
+    public static void employeeInformation(int employeeNumber_, int coveredDays) {
+        String lastName;
+        String firstName;
+        String birthday;
+        String address;
+        String phoneNumber;
+        String sssNumber;
+        String philhealthNo;
+        String tinNo;
+        String pagibig;
+        String status;
+        String position;
+        String immediateSupervisor;
+        double basicSalary;
+        double riceSubsidy;
+        double phoneAllowance;
+        double clothingAllowance;
+        double grossSemiMonthlyRate;
+        double hourlyRate;
+        int index_;
+
+        index_ = employeeNumber_;
+        lastName = employeeNameDB(index_).get(0);
+        firstName = employeeNameDB(index_).get(1);
+        birthday = birthdayDB(index_);
+        address = addressDB(index_);
+        phoneNumber = phoneNumberDB(index_);
+        sssNumber = sssNumberDB(index_);
+        philhealthNo = philhealthNoDB(index_);
+        tinNo = tinNoDB(index_);
+        pagibig = pagibigDB(index_);
+        status = employeeStatusDB(index_);
+        position = employeePositionDB(index_);
+        immediateSupervisor = immediateSupervisorsDB(index_);
+        basicSalary = basicSalaryDB(index_);
+        riceSubsidy = riceSubsidyDB(index_);
+        phoneAllowance = phoneAllowanceDB(index_);
+        clothingAllowance = clothingAllowanceDB(index_);
+        grossSemiMonthlyRate = basicSalary / 2;
+        hourlyRate = basicSalary / coveredDays;
+
+        //Print All information of the Employee
+        System.out.println("");
+        System.out.printf("%" + (55 + "EMPLOYEE INFORMATION".length()) / 2 + "s%n", "EMPLOYEE INFORMATION");
+        System.out.println("-".repeat(55));
+        System.out.printf("%-30s: %s%n", "Employee No.", employeeNumber_);
+        System.out.printf("%-30s: %s%n", "Last Name", lastName);
+        System.out.printf("%-30s: %s%n", "First Name", firstName);
+        System.out.printf("%-30s: %s%n", "Birthday", birthday);
+        System.out.printf("%-30s: %s%n", "Address", address);
+        System.out.printf("%-30s: %s%n", "Phone Number", phoneNumber);
+        System.out.printf("%-30s: %s%n", "SSS Number", sssNumber);
+        System.out.printf("%-30s: %s%n", "Philhealth Number", philhealthNo);
+        System.out.printf("%-30s: %s%n", "TIN Number", tinNo);
+        System.out.printf("%-30s: %s%n", "Pag-ibig Number", pagibig);
+        System.out.printf("%-30s: %s%n", "Status", status);
+        System.out.printf("%-30s: %s%n", "Position", position);
+        System.out.printf("%-30s: %s%n", "Immediate Supervisor", immediateSupervisor);
+        System.out.printf("%-30s: P%,.2f%n", "Basic Salary", basicSalary);
+        System.out.printf("%-30s: P%,.2f%n", "Phone Allowance", phoneAllowance);
+        System.out.printf("%-30s: P%,.2f%n", "Clothing Allowance", clothingAllowance);
+        System.out.printf("%-30s: P%,.2f%n", "Gross Semi-monthly Rate", grossSemiMonthlyRate);
+        System.out.printf("%-30s: P%,.2f%n", "Hourly Rate", hourlyRate);
+        System.out.println("-".repeat(55));
 
     }
-       
-    public static void processData(int employeeNumber_, ArrayList<String> inputs) {
+    
+    
+
+    public static void processData(int employeeNumber_, ArrayList<String> inputs, int coveredDays) {
 
         int index_;
         index_ = employeeNumber_ - 1; //determine the values of each variable
@@ -82,8 +170,8 @@ public class MotorPH_A1103 {
         double basicSalary;
 
         employeePosition_ = employeePosition(index_);
-        lastName = employeeName(index_).get(0);
-        firstName = employeeName(index_).get(1);
+        lastName = employeeNameDB(index_).get(0);
+        firstName = employeeNameDB(index_).get(1);
         grossSemi_monthlyRate = basicSalaryDB(index_) / 2;
         basicSalary = basicSalaryDB(index_);
 
@@ -128,9 +216,7 @@ public class MotorPH_A1103 {
         double overtimeRate;
         double takeHomePay;
         int numWorkedDays;
-        int coveredDays;
 
-        coveredDays = 26; //Set to maximum workings day in a month
         dailyRateCutoff = basicSalary / coveredDays;
         hourlyRateCutoff = dailyRateCutoff / maxRegularHours;
         overtimeRate = 1.25; //set overtime pay rate to 25% of the hourlyRate
@@ -148,7 +234,7 @@ public class MotorPH_A1103 {
         double taxableMonthlyPay;
         double basis;
 
-        basis = basicSalary;
+        basis = grossIncome;  //Value to be considered to determine SSS, Philhealth and Pag-ibig
         sssDeduction = calculateSSS(basis);
         philHealthDeduction = calculatePhilHealth(basis);
         pagIbigDeduction = calculatePagIbig(basis);
@@ -160,65 +246,10 @@ public class MotorPH_A1103 {
         takeHomePay = grossIncome - totalDeduction + totalBenefits;
         numWorkedDays = timeSheet.size() / 2;
 
-        //print employee information
-        String birthday;
-        String address;
-        String phoneNumber;
-        String sssNumber;
-        String philhealthNo;
-        String tinNo;
-        String pagibig;
-        String status;
-        String position;
-        String immediateSupervisor;
-        double grossSemiMonthlyRate;
-        double hourlyRate;
-
-        index_ = employeeNumber_;
-        birthday = birthdayDB(index_);
-        address = addressDB(index_);
-        phoneNumber = phoneNumberDB(index_);
-        sssNumber = sssNumberDB(index_);
-        philhealthNo = philhealthNoDB(index_);
-        tinNo = tinNoDB(index_);
-        pagibig = pagibigDB(index_);
-        status = employeeStatusDB(index_);
-        position = employeePositionDB(index_);
-        immediateSupervisor = immediateSupervisorsDB(index_);
-        basicSalary = basicSalaryDB(index_);
-        riceSubsidy = riceSubsidyDB(index_);
-        phoneAllowance = phoneAllowanceDB(index_);
-        clothingAllowance = clothingAllowanceDB(index_);
-        grossSemiMonthlyRate = basicSalary / 2;
-        hourlyRate = basicSalary / coveredDays;
-
-        int printOutWidth = 55;
-        // Print Personal Information Section
-        System.out.printf("%" + (55 + "EMPLOYEE DETAILS".length()) / 2,"EMPLOYEE DETAILS" );
-        System.out.println("-".repeat(printOutWidth));
-        System.out.printf("%-30s: %s%n", "Employee #", employeeNumber_);
-        System.out.printf("%-30s: %s%n", "Last Name", lastName);
-        System.out.printf("%-30s: %s%n", "First Name", firstName);
-        System.out.printf("%-30s: %s%n", "Birthday", birthday);
-        System.out.printf("%-30s: %s%n", "Address", address);
-        System.out.printf("%-30s: %s%n", "Phone Number", phoneNumber);
-        System.out.printf("%-30s: %s%n", "SSS Number", sssNumber);
-        System.out.printf("%-30s: %s%n", "Philhealth Number", philhealthNo);
-        System.out.printf("%-30s: %s%n", "TIN Number", tinNo);
-        System.out.printf("%-30s: %s%n", "Pag-ibig Number", pagibig);
-        System.out.printf("%-30s: %s%n", "Status", status);
-        System.out.printf("%-30s: %s%n", "Position", position);
-        System.out.printf("%-30s: %s%n", "Immediate Supervisor", immediateSupervisor);
-        System.out.printf("%-30s: %.2f%n", "Basic Salary", basicSalary);
-        System.out.printf("%-30s: %.2f%n", "Rice Subsidy", riceSubsidy);
-        System.out.printf("%-30s: %.2f%n", "Phone Allowance", phoneAllowance);
-        System.out.printf("%-30s: %.2f%n", "Clothing Allowance", clothingAllowance);
-        System.out.printf("%-30s: %.2f%n", "Gross Semi-monthly Rate", grossSemiMonthlyRate);
-        System.out.printf("%-30s: %.2f%n", "Hourly Rate", hourlyRate);
-
         //Print PaySlip
+        // Print Personal Information Section
         System.out.printf("%" + (55 + "EMPLOYEE PAYSLIP".length()) / 2 + "s%n", "EMPLOYEE PAYSLIP");
-        System.out.println("-".repeat(printOutWidth));
+        System.out.println("-".repeat(55));
         System.out.println("EMPLOYEE INFORMATION:");
         System.out.printf("%-30s: %s, %s%n", "Name", lastName, firstName);
         System.out.printf("%-30s: %s%n", "Employee Position/ Department", employeePosition_);
@@ -255,7 +286,6 @@ public class MotorPH_A1103 {
         System.out.printf("%-30s: P%,.2f%n", "Total Benefits", totalBenefits);
         System.out.printf("%-30s: P%,.2f%n", "Total Deduction", totalDeduction);
         System.out.printf("%-30s: P%,.2f%n", "Take-Home Pay", takeHomePay);
-
     }
 
     public static ArrayList<String> extractTimeIn(ArrayList<String> timeSheet) {
@@ -375,7 +405,6 @@ public class MotorPH_A1103 {
             200833.33 + 0.35 * (taxableMonthlyPay - BIRincomeThresholds[4]),};
 
         double whTax = 0;
-
         for (int i = 0; i < BIRincomeThresholds.length; i++) {
             if (taxableMonthlyPay < BIRincomeThresholds[i]) {
                 whTax = BIRTaxRate[i];
@@ -443,7 +472,14 @@ public class MotorPH_A1103 {
         return philHealth_;
     }
 
-    public static ArrayList<String> employeeName(int index_) {
+    public static void clearTerminal() {
+        for (int i = 0; i < 60; i++) {    //creates nexline 60
+            System.out.println("");      
+        }
+    }
+
+    //Methods below are for the database
+    public static ArrayList<String> employeeNameDB(int index_) {
         String[] lastName = {
             "Garcia",
             "Lim",
@@ -526,7 +562,7 @@ public class MotorPH_A1103 {
         return employeeName;
     }
 
-    public static int[] employeeNumberDatabase() {
+    public static int[] employeeNumberDB() {
         int[] employeeNumber = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
             11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
             21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
