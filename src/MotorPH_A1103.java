@@ -261,8 +261,6 @@ public class MotorPH_A1103 {
         regularWorkedHour = regularWorkedHours(regularHoursList);
         overtimeHour = overtimeHours(overtimeHoursList);
 
-                
-        
         // Computation of Earnings
         double dailyRateCutoff;
         double hourlyRateCutoff;
@@ -651,10 +649,12 @@ public class MotorPH_A1103 {
 
     public static double phoneAllowanceDB(int index_) {
         // Phone allowance based on search criteria
-        int[] phoneAllowance = {2000, 2000, 2000, 1000, 1000, 800, 500, 500, 1000, 1000,
-            800, 500, 500, 1000, 800, 800, 500, 500, 500, 500,
+        int[] phoneAllowance =  {
+            2000, 2000, 2000, 1000, 1000, 800, 500, 500, 1000,
+            1000, 800, 500, 500, 1000, 800, 800, 500, 500, 500,
             500, 500, 500, 500, 500, 500, 500, 500, 500, 500,
-            500, 1000, 1000, 1000};
+            1000, 1000, 1000
+        };
 
         int phoneAllowance_ = phoneAllowance[index_];
         return phoneAllowance_;
@@ -662,10 +662,9 @@ public class MotorPH_A1103 {
 
     public static double clothingAllowanceDB(int index_) {
         // Clothing allowance based on search criteria
-        int[] clothingAllowance = {1000, 1000, 1000, 1000, 1000, 800, 500, 500, 1000, 1000,
-            800, 500, 500, 1000, 800, 800, 500, 500, 500, 500,
-            500, 500, 500, 500, 500, 500, 500, 500, 500, 500,
-            500, 1000, 1000, 1000};
+        int[] clothingAllowance = { 1000, 1000, 1000, 1000, 1000, 1000, 800, 500, 500, 1000,
+            1000, 800, 500, 500, 1000, 800, 800, 500, 500, 500, 500,
+            500, 500, 500, 500, 500, 500, 500, 500, 1000, 1000, 1000};
 
         int clothingAllowance_ = clothingAllowance[index_];
         return clothingAllowance_;
