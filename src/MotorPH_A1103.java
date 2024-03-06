@@ -442,7 +442,6 @@ public class MotorPH_A1103 {
         System.out.println("-".repeat(55));
         System.out.printf("%-30s: %s%n", "Employee No.", employeeNumber_);
         System.out.printf("%-30s: %s%n", "Last Name", lastName);
-        System.out.printf("%" + (55 + "EMPLOYEE INFORMATION".length()) / 2 + "s%n", "EMPLOYEE INFORMATION");
         System.out.printf("%-30s: %s%n", "First Name", firstName);
         System.out.printf("%-30s: %s%n", "Birthday", birthday);
         System.out.printf("%-30s: %s%n", "Address", address);
