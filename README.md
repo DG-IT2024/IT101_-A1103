@@ -3,6 +3,7 @@ MotorPH Project
 
 The program will calculate the payroll based on the number of hours worked by an employee. You will be asked to provide the employee number, and time IN and time Out. 
 
+/n
 <Limitations and considerations>
 Time in 12:00 to 13:00.BreakTime. not counted.
 Maximum regular paid hours is 8hours
