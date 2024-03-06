@@ -40,7 +40,7 @@ public class MotorPH_A1103 {
 
             int employeeNumber_ = employeeNoEntry(coveredDays, maxRegularHours);
 
-            timeEntry(employeeNumber_,coveredDays, maxRegularHours);
+            timeEntry(employeeNumber_, coveredDays, maxRegularHours);
 
             // clear console prompt
             String response1;
@@ -175,12 +175,9 @@ public class MotorPH_A1103 {
             }
 
             printTimeSheet(daysList, timeInList, timeOutList, regularHoursList, overtimeHoursList);
-            
-       
-            processData(employeeNumber_,maxRegularHours ,workedDays, coveredDays,regularHoursList, overtimeHoursList);
-            
-            
-           
+
+            processData(employeeNumber_, maxRegularHours, workedDays, coveredDays, regularHoursList, overtimeHoursList);
+
             break;
         }
 
@@ -196,7 +193,7 @@ public class MotorPH_A1103 {
     }
 
     public static Integer overtimeHours(ArrayList<Integer> overtimeHoursList) {
-        
+
         int totalOvertimeHour = 0;
 
         for (int i = 0; i < overtimeHoursList.size(); i++) {
@@ -205,8 +202,7 @@ public class MotorPH_A1103 {
 
         return totalOvertimeHour;
     }
-    
-    
+
     private static boolean isValidTimeFormat(String time) {
         return time.matches("([01]?[0-9]|2[0-3]):[0-5][0-9]");
     }
@@ -225,7 +221,7 @@ public class MotorPH_A1103 {
         System.out.println(" x".repeat(27));
     }
 
-    public static void processData(int employeeNumber_, int maxRegularHours ,int workedDays, int coveredDays, ArrayList<Integer> regularHoursList, ArrayList<Integer> overtimeHoursList) {
+    public static void processData(int employeeNumber_, int maxRegularHours, int workedDays, int coveredDays, ArrayList<Integer> regularHoursList, ArrayList<Integer> overtimeHoursList) {
 
         int index_;
         index_ = employeeNumber_ - 1; //determine the values of each variable
@@ -268,7 +264,7 @@ public class MotorPH_A1103 {
         double overtimeRate;
         double regularPay;
         double overtimePay;
-                
+
         double takeHomePay;
 
         dailyRateCutoff = basicSalary / coveredDays;
@@ -276,7 +272,7 @@ public class MotorPH_A1103 {
         regularPay = hourlyRateCutoff * regularWorkedHour;
         overtimeRate = 1.25; //set overtime pay rate to 25% of the hourlyRate
         overtimePay = overtimeHour * overtimeRate * hourlyRateCutoff;
-        grossIncome =  regularPay + overtimePay;
+        grossIncome = regularPay + overtimePay;
 
         //Government Deductions (SSS, PhilHealth, Pagibig)
         double sssDeduction;
@@ -649,12 +645,11 @@ public class MotorPH_A1103 {
 
     public static double phoneAllowanceDB(int index_) {
         // Phone allowance based on search criteria
-        int[] phoneAllowance =  {
-            2000, 2000, 2000, 1000, 1000, 800, 500, 500, 1000,
+        int[] phoneAllowance = {
+            2000, 2000, 2000, 2000, 1000, 1000, 800, 500, 500, 1000,
             1000, 800, 500, 500, 1000, 800, 800, 500, 500, 500,
             500, 500, 500, 500, 500, 500, 500, 500, 500, 500,
-            1000, 1000, 1000
-        };
+            500, 1000, 1000, 1000,};
 
         int phoneAllowance_ = phoneAllowance[index_];
         return phoneAllowance_;
@@ -662,9 +657,10 @@ public class MotorPH_A1103 {
 
     public static double clothingAllowanceDB(int index_) {
         // Clothing allowance based on search criteria
-        int[] clothingAllowance = { 1000, 1000, 1000, 1000, 1000, 1000, 800, 500, 500, 1000,
-            1000, 800, 500, 500, 1000, 800, 800, 500, 500, 500, 500,
-            500, 500, 500, 500, 500, 500, 500, 500, 1000, 1000, 1000};
+        int[] clothingAllowance = {1000, 1000, 1000, 1000, 1000, 1000, 800, 500, 500, 1000,
+            1000, 800, 500, 500, 1000, 800, 800, 500, 500, 500,
+            500, 500, 500, 500, 500, 500, 500, 500, 500, 500,
+            500, 1000, 1000, 1000};
 
         int clothingAllowance_ = clothingAllowance[index_];
         return clothingAllowance_;
