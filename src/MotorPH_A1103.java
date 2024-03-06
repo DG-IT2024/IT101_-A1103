@@ -1,8 +1,9 @@
 
-/*Notes:
+/*
 Author @dgiltendez 
 Group 5
 
+Input Notes:
 Separate time entries with comma
 Write Time In followed by Timeout.
 Time should follow HH:mm format.
@@ -13,11 +14,11 @@ Limitations and considerations:
 Time in 12:00 to 13:00.BreakTime. not counted.
 Maximum regular paid hours is 8hours
 GrossIncome(Pay for hours worked) is used to determine the SSS, PhilHealth, Pag-ibig deductions
-Overtime is only counted if employee works for more than 8hours
+Overtime is only computed if employee works for more than 8hours
 Overtime pay consideration: 25% more of the regular hourly rate.
 This program computes for one month payroll. 
 Working days is 20days. Maximum days
-No need to put timeIn, TimeOut for absent
+
  
  */
 import java.time.LocalTime;
