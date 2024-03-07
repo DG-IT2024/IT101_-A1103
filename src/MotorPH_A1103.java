@@ -10,12 +10,12 @@ Time should follow HH:mm format.
 Input 24-hour format
 
 
-Limitations and considerations:
+Features and Limitations:
 Time in 12:00 to 13:00.BreakTime. not counted.
 Maximum regular paid hours is 8hours
 GrossIncome(Pay for hours worked) is used to determine the SSS, PhilHealth, Pag-ibig deductions
 Overtime is only computed if employee works for more than 8hours
-Overtime pay consideration: 25% more of the regular hourly rate.
+Overtime pay consideration. Available options: 1)Don't consider Overtime(rate set to 0) 2)Overtime Pay rate 
 This program computes for one month payroll. 
 Working days is 20days. Maximum days
 
@@ -38,11 +38,13 @@ public class MotorPH_A1103 {
 
             Scanner entry = new Scanner(System.in);
 
+            // Enter Employee Number
             int employeeNumber_ = employeeNoEntry(coveredDays, maxRegularHours);
 
+            // Enter TimeIn/ TimeOut connected to WorkedDays Computation
             timeEntry(employeeNumber_, coveredDays, maxRegularHours);
 
-            // clear console prompt
+            // Clear console prompt
             String response1;
             do {
                 System.out.println("\nDo you want to clear the terminal? (Y/N)");
@@ -54,7 +56,7 @@ public class MotorPH_A1103 {
 
             if (response1.equals("y")) {
                 System.out.println("\033c"); // remove all the prior text (tested on command prompt)
-                clearTerminal(); //generates nextline to hide the text
+                clearTerminal(); //generates empty nextlines to hide the text
                 System.out.println("Console Cleared");
             }
 
@@ -90,9 +92,11 @@ public class MotorPH_A1103 {
                 int employeeNumber_ = Integer.parseInt(employeeNumber);
 
                 // Validate employee number
-                if (employeeNumber_ > 34 || employeeNumber_ <= 0) {
+                if (employeeNumber_ > employeeNumberDB().length || employeeNumber_ <= 0) { // maximum emloyee
                     throw new IllegalArgumentException("Invalid Input.---");
                 }
+
+                // Printing Employee Information
                 employeeInformation(employeeNumber_, coveredDays, maxRegularHours);
 
                 return employeeNumber_;
@@ -108,6 +112,7 @@ public class MotorPH_A1103 {
     }
 
     public static void timeEntry(int employeeNumber_, int coveredDays, int maxRegularHours) {
+
         Scanner timeEntryScan = new Scanner(System.in);
 
         while (true) {
@@ -118,26 +123,31 @@ public class MotorPH_A1103 {
 
             int workedDays;
 
-            // Create array for timesheet
+            double overtimeRate_;
+
+            // Create array for timesheet 
             ArrayList<Integer> daysList = new ArrayList<>();
             ArrayList<String> timeInList = new ArrayList<>();
             ArrayList<String> timeOutList = new ArrayList<>();
             ArrayList<Integer> regularHoursList = new ArrayList<>();
             ArrayList<Integer> overtimeHoursList = new ArrayList<>();
+            ArrayList<Double> overtimeRateList = new ArrayList<>();
 
+            //Error Handling for workedDays Entry   
             try {
                 workedDays = Integer.parseInt(workedDaysInput);
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid number of days.");
+                System.out.println("--- Error: Invalid input. Please enter a valid number of days.");
                 continue; // Restart the loop
             }
             if (workedDays > coveredDays) {
-                System.out.println("Invalid input. The number of days worked exceeds the covered days.");
-                continue; // Restart the loop
+                System.out.println("--- Error: Invalid input. The number of days worked exceeds the covered days.");
+                continue;
             }
-            if (workedDays == 0) {
-                System.out.println("Invalid input. The number of days is null.");
-                continue; // Restart the loop
+
+            if (workedDays <= 0) {
+                System.out.println("--- Error: Invalid input. No worked days to compute.");
+                continue;
             }
 
             for (int i = 1; i <= workedDays; i++) {
@@ -167,20 +177,80 @@ public class MotorPH_A1103 {
                 if (dailyWorkedHours > maxRegularHours) {
                     workedOvertimeHours = dailyWorkedHours - maxRegularHours;
                 }
-                overtimeHoursList.add(workedOvertimeHours);
 
-                System.out.println("\nRegular Time : " + workedregularHours);
-                System.out.println("Overtime Time : " + workedOvertimeHours);
-                System.out.println("-".repeat(55));
+                //Print computed regular hours and overtime
+                regularOvertimeView(workedregularHours, workedOvertimeHours);
+
+                //Overtime pay consideration
+                overtimeRate_ = 0; // set to zero for no workedOvertimeHours
+
+                if (workedOvertimeHours > 0) {
+                    overtimeRate_ = overtimeRateInput(); // overtime pay rate prompt if there's computer overtime hours
+                    if (overtimeRate_ == 0) {
+                        workedOvertimeHours = 0; //If the overtime rate is set to 0, reset overtime hours to 0
+                    }
+                }
+
+                //Overtime hours and rate consideration
+                overtimeHoursList.add(workedOvertimeHours);
+                overtimeRateList.add(overtimeRate_);
+
             }
 
-            printTimeSheet(daysList, timeInList, timeOutList, regularHoursList, overtimeHoursList);
+            printTimeSheet(daysList, timeInList, timeOutList, regularHoursList, overtimeHoursList, overtimeRateList);
 
-            processData(employeeNumber_, maxRegularHours, workedDays, coveredDays, regularHoursList, overtimeHoursList);
-
+            processPayroll(employeeNumber_, maxRegularHours, workedDays, coveredDays, regularHoursList, overtimeHoursList, overtimeRateList);
             break;
         }
 
+    }
+
+    public static double overtimeRateInput() {
+
+        Scanner overtimeRateEntry = new Scanner(System.in);
+
+        while (true) {
+            try {
+                //Employee Entry
+                System.out.println("\nEnter Overtime Pay rate: (Example 1.25) ");
+                System.out.println("(Set rate to 0 if you don't want to credit the overtime hours)");
+
+                String overtimeRate = overtimeRateEntry.nextLine();
+                double overtimeRate_ = Double.parseDouble(overtimeRate);
+
+                if (overtimeRate_ < 0) {
+                    System.out.println("--- Error: Invalid Input. Overtime rate must be non-negative. ---");
+                    continue;
+                }
+
+                if (overtimeRate_ > 0 && overtimeRate_ < 1) {
+                    System.out.println("--- Error: Invalid Input. Overtime rate must be greater than 1. --- \nExample: 1.25");
+                    continue;
+                }
+
+                return overtimeRate_;
+
+            } catch (NumberFormatException e) {
+                System.out.println("--- Error: Invalid Input. Please enter a valid number. ---");
+            }
+        }
+    }
+
+    public static double weightedOvertimeHour(ArrayList< Integer> overtimeHoursList, ArrayList<Double> overtimeRateList) {
+        double overtimeHourPay = 0 ; // product of overime hours and overtime pay rate 
+        
+        for(int i =0;i<overtimeHoursList.size();i++ ){
+            overtimeHourPay += overtimeHoursList.get(i)*overtimeRateList.get(i);//sum of  weighted Overtime   }
+        }
+        return overtimeHourPay;
+    }
+
+    public static void regularOvertimeView(int workedregularHours, int workedOvertimeHours) {
+
+        System.out.println("-".repeat(55));
+        System.out.println("Regular Hours : " + workedregularHours);
+        System.out.println("Overtime Hours : " + workedOvertimeHours);
+        System.out.println("-".repeat(55));
     }
 
     public static Integer regularWorkedHours(ArrayList< Integer> regularHoursList) {
@@ -210,18 +280,20 @@ public class MotorPH_A1103 {
     public static void printTimeSheet(ArrayList<Integer> daysList, ArrayList<String> timeInList,
             ArrayList<String> timeOutList,
             ArrayList<Integer> regularHoursList,
-            ArrayList<Integer> overtimeHoursList) {
+            ArrayList<Integer> overtimeHoursList,
+            ArrayList<Double> overtimeRateList) {
 
-        System.out.printf("\n\n%" + (55 + "x x x x x TIMESHEET x x x x x ".length()) / 2 + "s%n", "x x x x x TIMESHEET x x x x x ");
-        System.out.printf("\n%-5s%-12s%-12s%-14s%-8s\n", "Day", "Time-In", "Time-Out", "Worked Hour", "Overtime");
+        //print format
+        System.out.printf("\n\n%" + (55 + "x x x x x x x TIMESHEETx x x x x x x".length()) / 2 + "s%n", "x x x x x x x TIMESHEETx x x x x x x\n");
+        System.out.printf("%-5s%-12s%-12s%-14s%-12s%-19s\n", "Day", "Time-In", "Time-Out", "Worked Hour", "Overtime", "Overtime Rate");
         for (int i = 0; i < daysList.size(); i++) {
-            System.out.printf("%-5d%-12s%-12s%-14d%-8d\n", daysList.get(i), timeInList.get(i), timeOutList.get(i), regularHoursList.get(i), overtimeHoursList.get(i));
+            System.out.printf("%-5d%-12s%-12s%-14d%-12d%-19.2f\n", daysList.get(i), timeInList.get(i), timeOutList.get(i), regularHoursList.get(i), overtimeHoursList.get(i), overtimeRateList.get(i));
         }
         System.out.println("");
         System.out.println(" x".repeat(27));
     }
 
-    public static void processData(int employeeNumber_, int maxRegularHours, int workedDays, int coveredDays, ArrayList<Integer> regularHoursList, ArrayList<Integer> overtimeHoursList) {
+    public static void processPayroll(int employeeNumber_, int maxRegularHours, int workedDays, int coveredDays, ArrayList<Integer> regularHoursList, ArrayList<Integer> overtimeHoursList, ArrayList<Double> overtimeRateList) {
 
         int index_;
         index_ = employeeNumber_ - 1; //determine the values of each variable
@@ -261,17 +333,14 @@ public class MotorPH_A1103 {
         double dailyRateCutoff;
         double hourlyRateCutoff;
         double grossIncome;
-        double overtimeRate;
         double regularPay;
         double overtimePay;
-
         double takeHomePay;
 
         dailyRateCutoff = basicSalary / coveredDays;
         hourlyRateCutoff = dailyRateCutoff / maxRegularHours;
         regularPay = hourlyRateCutoff * regularWorkedHour;
-        overtimeRate = 1.25; //set overtime pay rate to 25% of the hourlyRate
-        overtimePay = overtimeHour * overtimeRate * hourlyRateCutoff;
+        overtimePay = weightedOvertimeHour(overtimeHoursList,overtimeRateList) * hourlyRateCutoff;
         grossIncome = regularPay + overtimePay;
 
         //Government Deductions (SSS, PhilHealth, Pagibig)
