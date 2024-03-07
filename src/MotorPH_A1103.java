@@ -5,19 +5,21 @@ Group 5
 
 Input Notes:
 Separate time entries with comma
-Write Time In followed by Timeout.
+Write Time-In followed by Time-Out.
 Time should follow HH:mm format.
 Input 24-hour format
 
 
 Features and Limitations:
-Time in 12:00 to 13:00.BreakTime. not counted.
+12:00-13:00(BreakTime). not counted in computed worked hours
 Maximum regular paid hours is 8hours
 GrossIncome(Pay for hours worked) is used to determine the SSS, PhilHealth, Pag-ibig deductions
 Overtime is only computed if employee works for more than 8hours
 Overtime pay consideration. Available options: 1)Don't consider Overtime(rate set to 0) 2)Overtime Pay rate 
 This program computes for one month payroll. 
 Working days is 20days. Maximum days
+Work starts at 8:00AM
+Grace period of 10mins. Considered late if Time-in 8:11.
 
  
  */
@@ -87,7 +89,7 @@ public class MotorPH_A1103 {
         while (true) {
             try {
                 //Employee Entry
-                System.out.println("\nEnter Employee Number:");
+                System.out.println("\nEnter Employee Number(1-" + employeeNumberDB().length + "):");
                 String employeeNumber = employeeNoEntry.nextLine();
                 int employeeNumber_ = Integer.parseInt(employeeNumber);
 
@@ -150,12 +152,14 @@ public class MotorPH_A1103 {
                 continue;
             }
 
+            //Enter TimeIn / TimeOut
             for (int i = 1; i <= workedDays; i++) {
                 System.out.println("\nEnter Day " + i + ": TimeIn, TimeOut\n(Format: HH:mm,HH:mm)");
                 String inputLine = timeEntryScan.nextLine();
 
+                // check if timeIn and timeOut is in valid time format
                 String[] timeSheet = inputLine.split(",");
-                if (timeSheet.length != 2 || !isValidTimeFormat(timeSheet[0].trim()) || !isValidTimeFormat(timeSheet[1].trim())) {
+               if (timeSheet.length != 2 || !isValidTimeFormat(timeSheet[0].trim()) || !isValidTimeFormat(timeSheet[1].trim())) {
                     System.out.println("--- Error: Invalid input format. Please enter time in the correct format.---\n Example: 08:00,17:00 ");
                     i -= 1; //Repeat the loop at the same day
                     continue;
@@ -163,6 +167,16 @@ public class MotorPH_A1103 {
 
                 String timeIn = timeSheet[0].trim();
                 String timeOut = timeSheet[1].trim();
+               
+                //Error Handling for timeformat
+                try {
+                    var parsedTimeIn = LocalTime.parse(timeIn); // Parse the TimeIN into a LocalTime object
+                    var parsedTimeOut = LocalTime.parse(timeOut); // Parse the TimeOut into a LocalTime object
+                } catch (Exception e) {
+                    System.out.println("---Error parsing time: " + e.getMessage()+ ". Correct format: HH:mm. ---");
+                    i -= 1; //Repeat the loop at the same day
+                    continue;
+                }
 
                 daysList.add(i); // append days to daysList
                 timeInList.add(timeIn);// append days to timeInList
@@ -202,259 +216,6 @@ public class MotorPH_A1103 {
             processPayroll(employeeNumber_, maxRegularHours, workedDays, coveredDays, regularHoursList, overtimeHoursList, overtimeRateList);
             break;
         }
-
-    }
-
-    public static double overtimeRateInput() {
-
-        Scanner overtimeRateEntry = new Scanner(System.in);
-
-        while (true) {
-            try {
-                //Employee Entry
-                System.out.println("\nEnter Overtime Pay rate: (Example 1.25) ");
-                System.out.println("(Set rate to 0 if you don't want to credit the overtime hours)");
-
-                String overtimeRate = overtimeRateEntry.nextLine();
-                double overtimeRate_ = Double.parseDouble(overtimeRate);
-
-                if (overtimeRate_ < 0) {
-                    System.out.println("--- Error: Invalid Input. Overtime rate must be non-negative. ---");
-                    continue;
-                }
-
-                if (overtimeRate_ > 0 && overtimeRate_ < 1) {
-                    System.out.println("--- Error: Invalid Input. Overtime rate must be greater than 1. --- \nExample: 1.25");
-                    continue;
-                }
-
-                return overtimeRate_;
-
-            } catch (NumberFormatException e) {
-                System.out.println("--- Error: Invalid Input. Please enter a valid number. ---");
-            }
-        }
-    }
-
-    public static double weightedOvertimeHour(ArrayList< Integer> overtimeHoursList, ArrayList<Double> overtimeRateList) {
-        double overtimeHourPay = 0 ; // product of overime hours and overtime pay rate 
-        
-        for(int i =0;i<overtimeHoursList.size();i++ ){
-            overtimeHourPay += overtimeHoursList.get(i)*overtimeRateList.get(i);//sum of  weighted Overtime   }
-        }
-        return overtimeHourPay;
-    }
-
-    public static void regularOvertimeView(int workedregularHours, int workedOvertimeHours) {
-
-        System.out.println("-".repeat(55));
-        System.out.println("Regular Hours : " + workedregularHours);
-        System.out.println("Overtime Hours : " + workedOvertimeHours);
-        System.out.println("-".repeat(55));
-    }
-
-    public static Integer regularWorkedHours(ArrayList< Integer> regularHoursList) {
-        int totalRegularHour = 0;
-
-        for (int i = 0; i < regularHoursList.size(); i++) {
-            totalRegularHour += regularHoursList.get(i);
-        }
-        return totalRegularHour;
-    }
-
-    public static Integer overtimeHours(ArrayList<Integer> overtimeHoursList) {
-
-        int totalOvertimeHour = 0;
-
-        for (int i = 0; i < overtimeHoursList.size(); i++) {
-            totalOvertimeHour += overtimeHoursList.get(i);
-        }
-
-        return totalOvertimeHour;
-    }
-
-    private static boolean isValidTimeFormat(String time) {
-        return time.matches("([01]?[0-9]|2[0-3]):[0-5][0-9]");
-    }
-
-    public static void printTimeSheet(ArrayList<Integer> daysList, ArrayList<String> timeInList,
-            ArrayList<String> timeOutList,
-            ArrayList<Integer> regularHoursList,
-            ArrayList<Integer> overtimeHoursList,
-            ArrayList<Double> overtimeRateList) {
-
-        //print format
-        System.out.printf("\n\n%" + (55 + "x x x x x x x TIMESHEETx x x x x x x".length()) / 2 + "s%n", "x x x x x x x TIMESHEETx x x x x x x\n");
-        System.out.printf("%-5s%-12s%-12s%-14s%-12s%-19s\n", "Day", "Time-In", "Time-Out", "Worked Hour", "Overtime", "Overtime Rate");
-        for (int i = 0; i < daysList.size(); i++) {
-            System.out.printf("%-5d%-12s%-12s%-14d%-12d%-19.2f\n", daysList.get(i), timeInList.get(i), timeOutList.get(i), regularHoursList.get(i), overtimeHoursList.get(i), overtimeRateList.get(i));
-        }
-        System.out.println("");
-        System.out.println(" x".repeat(27));
-    }
-
-    public static void processPayroll(int employeeNumber_, int maxRegularHours, int workedDays, int coveredDays, ArrayList<Integer> regularHoursList, ArrayList<Integer> overtimeHoursList, ArrayList<Double> overtimeRateList) {
-
-        int index_;
-        index_ = employeeNumber_ - 1; //determine the values of each variable
-
-        //Employee Information   
-        String employeePosition_;
-        String lastName;
-        String firstName;
-        double grossSemi_monthlyRate;
-        double basicSalary;
-
-        employeePosition_ = employeePosition(index_);
-        lastName = employeeNameDB(index_).get(0);
-        firstName = employeeNameDB(index_).get(1);
-        grossSemi_monthlyRate = basicSalaryDB(index_) / 2;
-        basicSalary = basicSalaryDB(index_);
-
-        //Benefits
-        double riceSubsidy;
-        double phoneAllowance;
-        double clothingAllowance;
-        double totalBenefits;
-
-        riceSubsidy = riceSubsidyDB(index_);
-        phoneAllowance = phoneAllowanceDB(index_);
-        clothingAllowance = clothingAllowanceDB(index_);
-        totalBenefits = riceSubsidy + phoneAllowance + clothingAllowance;
-
-        // Determine Regular Working Hours and Overtime HOurs
-        int regularWorkedHour;
-        int overtimeHour;
-
-        regularWorkedHour = regularWorkedHours(regularHoursList);
-        overtimeHour = overtimeHours(overtimeHoursList);
-
-        // Computation of Earnings
-        double dailyRateCutoff;
-        double hourlyRateCutoff;
-        double grossIncome;
-        double regularPay;
-        double overtimePay;
-        double takeHomePay;
-
-        dailyRateCutoff = basicSalary / coveredDays;
-        hourlyRateCutoff = dailyRateCutoff / maxRegularHours;
-        regularPay = hourlyRateCutoff * regularWorkedHour;
-        overtimePay = weightedOvertimeHour(overtimeHoursList,overtimeRateList) * hourlyRateCutoff;
-        grossIncome = regularPay + overtimePay;
-
-        //Government Deductions (SSS, PhilHealth, Pagibig)
-        double sssDeduction;
-        double philHealthDeduction;
-        double pagIbigDeduction;
-        double benefitDeduction;
-        double netMonthPay;
-        double withHoldingTax;
-        double totalDeduction;
-        double taxableMonthlyPay;
-        double basis;
-
-        basis = grossIncome;  //Value to be considered to determine SSS, Philhealth and Pag-ibig
-        sssDeduction = calculateSSS(basis);
-        philHealthDeduction = calculatePhilHealth(basis);
-        pagIbigDeduction = calculatePagIbig(basis);
-        benefitDeduction = sssDeduction + pagIbigDeduction + philHealthDeduction;
-        netMonthPay = grossIncome - benefitDeduction;
-        taxableMonthlyPay = netMonthPay;
-        withHoldingTax = calculateWHTax(taxableMonthlyPay);
-        totalDeduction = withHoldingTax + benefitDeduction;
-        takeHomePay = grossIncome - totalDeduction + totalBenefits;
-
-        //Print PaySlip
-        // Print Personal Information Section
-        System.out.println();
-        System.out.printf("%" + (55 + "EMPLOYEE PAYSLIP".length()) / 2 + "s%n", "EMPLOYEE PAYSLIP");
-        System.out.println("-".repeat(55));
-        System.out.println("EMPLOYEE INFORMATION:");
-        System.out.printf("%-30s: %s, %s%n", "Name", lastName, firstName);
-        System.out.printf("%-30s: %s%n", "Employee Position/ Department", employeePosition_);
-        System.out.printf("%-30s: %d%n", "Employee Number", employeeNumber_);
-        System.out.printf("%-30s: %s%n", "Cut-off Covered Days", coveredDays);
-
-        // Print Earnings Section
-        System.out.println("\nEARNINGS:");
-        System.out.printf("%-30s: P%,.2f%n", "Basic Salary", basicSalary);
-        System.out.printf("%-30s: P%,.2f%n", "Semi-monthly Rate", grossSemi_monthlyRate);
-        System.out.printf("%-30s: P%,.2f%n", "Hourly Rate", hourlyRateCutoff);
-        System.out.printf("%-30s: %d%n", "Days Worked", workedDays);
-        System.out.printf("%-30s: %d%n", "Hours Worked ", regularWorkedHour);
-        System.out.printf("%-30s: P%,.2f%n", "Regular Pay ", regularPay);
-        System.out.printf("%-30s: %d%n", "Overtime Hour", overtimeHour);
-        System.out.printf("%-30s: P%,.2f%n", "Overtime Pay", overtimePay);
-        System.out.printf("%-30s: P%,.2f%n", "Gross Income", grossIncome);
-
-        // Print Deductions Section
-        System.out.println("\nDEDUCTIONS:");
-        System.out.printf("%-30s: P%,.2f%n", "SSS Deduction", sssDeduction);
-        System.out.printf("%-30s: P%,.2f%n", "PhilHealth Deduction", philHealthDeduction);
-        System.out.printf("%-30s: P%,.2f%n", "Pag-Ibig Deduction", pagIbigDeduction);
-        System.out.printf("%-30s: P%,.2f%n", "Withholding Tax", withHoldingTax);
-        System.out.printf("%-30s: P%,.2f%n", "Total Deduction", totalDeduction);
-
-        // Print Benefits Section
-        System.out.println("\nBENEFITS ");
-        System.out.printf("%-30s: P%,.2f%n", "Rice Subsidy", riceSubsidy);
-        System.out.printf("%-30s: P%,.2f%n", "Phone Allowance", phoneAllowance);
-        System.out.printf("%-30s: P%,.2f%n", "Clothing Allowance", clothingAllowance);
-        System.out.printf("%-30s: P%,.2f%n", "Total Benefits", totalBenefits);
-
-        // Print Summary Section
-        System.out.println("\nSUMMARY:");
-        System.out.printf("%-30s: P%,.2f%n", "Gross Income", grossIncome);
-        System.out.printf("%-30s: P%,.2f%n", "Total Benefits", totalBenefits);
-        System.out.printf("%-30s: P%,.2f%n", "Total Deduction", totalDeduction);
-        System.out.printf("%-30s: P%,.2f%n", "Take-Home Pay", takeHomePay);
-    }
-
-    public static int calculateWorkedHours(String timeIn, String timeOut) {
-        // Split the input string by ":"
-        String[] part1 = timeIn.split(":");
-        String[] part2 = timeOut.split(":");
-
-        // Convert the hour and minute parts to integers
-        int hour_TimeIN = Integer.parseInt(part1[0]);
-        int minute_TimeIN = Integer.parseInt(part1[1]);
-
-        int hour_TimeOut = Integer.parseInt(part2[0]);
-        int minute_TimeOut = Integer.parseInt(part2[1]);
-
-        int gracePeriod = 10; // grace period in minutes
-
-        LocalTime targetTime = LocalTime.of(8, gracePeriod + 1); //parameter for grace period
-
-        LocalTime parsedTime1 = LocalTime.parse(timeIn); // Parse the TimeIN into a LocalTime object
-
-        if (parsedTime1.isBefore(targetTime) && hour_TimeIN == 8) {  //if within graceperiod 8:00AM - 8:10AM. set TimeIN = 8:00AM
-            minute_TimeIN = 0;
-        }
-
-        // Calculate the difference in minutes
-        int totalMinutes1 = hour_TimeIN * 60 + minute_TimeIN;
-        int totalMinutes2 = hour_TimeOut * 60 + minute_TimeOut;
-
-        int workedMinutes = totalMinutes2 - totalMinutes1;
-
-        // Calculate the worked hours. only consider hours. paid by the hour.
-        int workedHour = workedMinutes / 60;
-
-        LocalTime breakStart = LocalTime.of(12, 1);//Set breaktime starts 12PM
-        LocalTime breakEnd = LocalTime.of(12, 59);//Set breaktime ends 12:59PM
-
-        LocalTime parsedTime2 = LocalTime.parse(timeOut); // Parse the TimeOut into a LocalTime object
-
-        int breakTime = 0; // initialize breakTime
-        if (parsedTime1.isBefore(breakStart) && parsedTime2.isAfter(breakEnd)) { //TimeIn after 12:00PM but before 1:00PM, not counted
-            breakTime = 1;
-        }
-
-        int workedHour_ = workedHour - breakTime;
-
-        return workedHour_;
 
     }
 
@@ -524,6 +285,265 @@ public class MotorPH_A1103 {
         System.out.printf("%-30s: P%,.2f%n", "Hourly Rate", hourlyRate);
         System.out.println("-".repeat(55));
 
+    }
+
+    public static int calculateWorkedHours(String timeIn, String timeOut) {
+        // break time 12:00PM to 13:00PM
+        // parsed timeIn and timeOut       
+
+        LocalTime parsedTimeIn = LocalTime.parse(timeIn); // Parse the TimeIN into a LocalTime object
+        LocalTime parsedTimeOut = LocalTime.parse(timeOut); // Parse the TimeOut into a LocalTime object
+
+        //Grace period consideration
+        int gracePeriod = 10; // grace period in minutes
+
+        LocalTime OfficeStart = LocalTime.of(8, 0);//Set Office starts 8AM
+
+        LocalTime targetTime = LocalTime.of(8, gracePeriod + 1); //parameter for grace period after Office start        
+
+        if (parsedTimeIn.isBefore(targetTime) && parsedTimeIn.getHour() == OfficeStart.getHour()) {  //if within graceperiod 8:00AM - 8:10AM. set TimeIN = 8:00AM
+            parsedTimeIn = OfficeStart;
+        }
+
+        //Breaktime
+        LocalTime breakStart = LocalTime.of(12, 0);//Set breaktime starts 12PM
+        LocalTime breakEnd = LocalTime.of(13, 00);//Set breaktime ends before 1PM
+
+        //Exclude worked hour during breaktime
+        if (parsedTimeIn.isAfter(LocalTime.of(11, 59)) && parsedTimeIn.isBefore(breakEnd)) {
+            parsedTimeIn = breakEnd;
+        }
+
+        //Deduct Breaktime in the total worked hours
+        int breakTime = 0; // initialize breakTime
+        if (parsedTimeIn.isBefore(breakStart) && parsedTimeOut.isAfter(LocalTime.of(12, 59))) { //TimeIn during breaktime is not counted
+            breakTime = 1;
+        }
+
+        // Calculate the difference in minutes
+        int totalMinutesIn = parsedTimeIn.getHour() * 60 + parsedTimeIn.getMinute();
+        int totalMinutesOut = parsedTimeOut.getHour() * 60 + parsedTimeOut.getMinute();
+
+        int workedMinutes = totalMinutesOut - totalMinutesIn;
+
+        // Calculate the worked hours. only consider hours. paid by the hour.
+        int workedHour = workedMinutes / 60;
+
+        int workedHour_ = workedHour - breakTime;
+
+        return workedHour_;
+
+    }
+
+    public static Integer regularWorkedHours(ArrayList< Integer> regularHoursList) {
+        int totalRegularHour = 0;
+
+        for (int i = 0; i < regularHoursList.size(); i++) {
+            totalRegularHour += regularHoursList.get(i);
+        }
+        return totalRegularHour;
+    }
+
+    public static Integer overtimeHours(ArrayList<Integer> overtimeHoursList) {
+
+        int totalOvertimeHour = 0;
+
+        for (int i = 0; i < overtimeHoursList.size(); i++) {
+            totalOvertimeHour += overtimeHoursList.get(i);
+        }
+
+        return totalOvertimeHour;
+    }
+
+    public static double overtimeRateInput() {
+
+        Scanner overtimeRateEntry = new Scanner(System.in);
+
+        while (true) {
+            try {
+                //Employee Entry
+                System.out.println("\nEnter Overtime Pay rate: (Example 1.25) ");
+                System.out.println("(Set rate to 0 if you don't want to credit the overtime hours)");
+
+                String overtimeRate = overtimeRateEntry.nextLine();
+                double overtimeRate_ = Double.parseDouble(overtimeRate);
+
+                if (overtimeRate_ < 0) {
+                    System.out.println("--- Error: Invalid Input. Overtime rate must be non-negative. ---");
+                    continue;
+                }
+
+                if (overtimeRate_ > 0 && overtimeRate_ < 1) {
+                    System.out.println("--- Error: Invalid Input. Overtime rate must be greater than 1. --- \nExample: 1.25");
+                    continue;
+                }
+
+                return overtimeRate_;
+
+            } catch (NumberFormatException e) {
+                System.out.println("--- Error: Invalid Input. Please enter a valid number. ---");
+            }
+        }
+    }
+
+    public static double weightedOvertimeHour(ArrayList< Integer> overtimeHoursList, ArrayList<Double> overtimeRateList) {
+        double overtimeHourPay = 0; // product of overime hours and overtime pay rate 
+
+        for (int i = 0; i < overtimeHoursList.size(); i++) {
+            overtimeHourPay += overtimeHoursList.get(i) * overtimeRateList.get(i);//sum of  weighted Overtime   }
+        }
+        return overtimeHourPay;
+    }
+
+    public static void regularOvertimeView(int workedregularHours, int workedOvertimeHours) {
+
+        System.out.println("-".repeat(55));
+        System.out.println("Regular Hours : " + workedregularHours);
+        System.out.println("Overtime Hours : " + workedOvertimeHours);
+        System.out.println("-".repeat(55));
+    }
+
+    public static boolean isValidTimeFormat(String time) {
+        boolean checkValidformat = false;
+        if (time.matches("\\d{2}:\\d{2}") || time.matches("([01]?[0-9]|2[0-3]):[0-5][0-9]")) {
+            checkValidformat = true;
+            }
+        
+        return checkValidformat;
+    }
+
+    public static void printTimeSheet(ArrayList<Integer> daysList, ArrayList<String> timeInList,
+            ArrayList<String> timeOutList,
+            ArrayList<Integer> regularHoursList,
+            ArrayList<Integer> overtimeHoursList,
+            ArrayList<Double> overtimeRateList) {
+
+        //print format
+        System.out.printf("\n\n%" + (55 + "x x x x x x x TIMESHEETx x x x x x x".length()) / 2 + "s%n", "x x x x x x x TIMESHEETx x x x x x x\n");
+        System.out.printf("%-5s%-12s%-12s%-14s%-12s%-19s\n", "Day", "Time-In", "Time-Out", "Worked Hour", "Overtime", "Overtime Rate");
+        for (int i = 0; i < daysList.size(); i++) {
+            System.out.printf("%-5d%-12s%-12s%-14d%-12d%-19.2f\n", daysList.get(i), timeInList.get(i), timeOutList.get(i), regularHoursList.get(i), overtimeHoursList.get(i), overtimeRateList.get(i));
+        }
+        System.out.println("");
+        System.out.println(" x".repeat(27));
+    }
+
+    public static void processPayroll(int employeeNumber_, int maxRegularHours, int workedDays, int coveredDays, ArrayList<Integer> regularHoursList, ArrayList<Integer> overtimeHoursList, ArrayList<Double> overtimeRateList) {
+
+        int index_;
+        index_ = employeeNumber_ - 1; //determine the values of each variable
+
+        //Employee Information   
+        String employeePosition_;
+        String lastName;
+        String firstName;
+        double grossSemi_monthlyRate;
+        double basicSalary;
+
+        employeePosition_ = employeePosition(index_);
+        lastName = employeeNameDB(index_).get(0);
+        firstName = employeeNameDB(index_).get(1);
+        grossSemi_monthlyRate = basicSalaryDB(index_) / 2;
+        basicSalary = basicSalaryDB(index_);
+
+        //Benefits
+        double riceSubsidy;
+        double phoneAllowance;
+        double clothingAllowance;
+        double totalBenefits;
+
+        riceSubsidy = riceSubsidyDB(index_);
+        phoneAllowance = phoneAllowanceDB(index_);
+        clothingAllowance = clothingAllowanceDB(index_);
+        totalBenefits = riceSubsidy + phoneAllowance + clothingAllowance;
+
+        // Determine Regular Working Hours and Overtime HOurs
+        int regularWorkedHour;
+        int overtimeHour;
+
+        regularWorkedHour = regularWorkedHours(regularHoursList);
+        overtimeHour = overtimeHours(overtimeHoursList);
+
+        // Computation of Earnings
+        double dailyRateCutoff;
+        double hourlyRateCutoff;
+        double grossIncome;
+        double regularPay;
+        double overtimePay;
+        double takeHomePay;
+
+        dailyRateCutoff = basicSalary / coveredDays;
+        hourlyRateCutoff = dailyRateCutoff / maxRegularHours;
+        regularPay = hourlyRateCutoff * regularWorkedHour;
+        overtimePay = weightedOvertimeHour(overtimeHoursList, overtimeRateList) * hourlyRateCutoff;
+        grossIncome = regularPay + overtimePay;
+
+        //Government Deductions (SSS, PhilHealth, Pagibig)
+        double sssDeduction;
+        double philHealthDeduction;
+        double pagIbigDeduction;
+        double benefitDeduction;
+        double netMonthPay;
+        double withHoldingTax;
+        double totalDeduction;
+        double taxableMonthlyPay;
+        double basis;
+
+        basis = grossIncome;  //Value to be considered to determine SSS, Philhealth and Pag-ibig
+        sssDeduction = calculateSSS(basis);
+        philHealthDeduction = calculatePhilHealth(basis);
+        pagIbigDeduction = calculatePagIbig(basis);
+        benefitDeduction = sssDeduction + pagIbigDeduction + philHealthDeduction;
+        netMonthPay = grossIncome - benefitDeduction;
+        taxableMonthlyPay = netMonthPay;
+        withHoldingTax = calculateWHTax(taxableMonthlyPay);
+        totalDeduction = withHoldingTax + benefitDeduction;
+        takeHomePay = grossIncome - totalDeduction + totalBenefits;
+
+        //Print PaySlip
+        // Print Personal Information Section
+        System.out.println();
+        System.out.printf("%" + (55 + "EMPLOYEE PAYSLIP".length()) / 2 + "s%n", "EMPLOYEE PAYSLIP");
+        System.out.println("-".repeat(55));
+        System.out.println("EMPLOYEE INFORMATION:");
+        System.out.printf("%-30s: %s, %s%n", "Name", lastName, firstName);
+        System.out.printf("%-30s: %s%n", "Employee Position/ Department", employeePosition_);
+        System.out.printf("%-30s: %d%n", "Employee Number", employeeNumber_);
+        System.out.printf("%-30s: %s%n", "Cut-off Covered Days", coveredDays);
+
+        // Print Earnings Section
+        System.out.println("\nEARNINGS:");
+        System.out.printf("%-30s: P%,.2f%n", "Basic Salary", basicSalary);
+        System.out.printf("%-30s: P%,.2f%n", "Semi-monthly Rate", grossSemi_monthlyRate);
+        System.out.printf("%-30s: P%,.2f%n", "Hourly Rate", hourlyRateCutoff);
+        System.out.printf("%-30s: %d%n", "Days Worked", workedDays);
+        System.out.printf("%-30s: %d%n", "Hours Worked ", regularWorkedHour);
+        System.out.printf("%-30s: P%,.2f%n", "Regular Pay ", regularPay);
+        System.out.printf("%-30s: %d%n", "Overtime Hour", overtimeHour);
+        System.out.printf("%-30s: P%,.2f%n", "Overtime Pay", overtimePay);
+        System.out.printf("%-30s: P%,.2f%n", "Gross Income", grossIncome);
+
+        // Print Deductions Section
+        System.out.println("\nDEDUCTIONS:");
+        System.out.printf("%-30s: P%,.2f%n", "SSS Deduction", sssDeduction);
+        System.out.printf("%-30s: P%,.2f%n", "PhilHealth Deduction", philHealthDeduction);
+        System.out.printf("%-30s: P%,.2f%n", "Pag-Ibig Deduction", pagIbigDeduction);
+        System.out.printf("%-30s: P%,.2f%n", "Withholding Tax", withHoldingTax);
+        System.out.printf("%-30s: P%,.2f%n", "Total Deduction", totalDeduction);
+
+        // Print Benefits Section
+        System.out.println("\nBENEFITS ");
+        System.out.printf("%-30s: P%,.2f%n", "Rice Subsidy", riceSubsidy);
+        System.out.printf("%-30s: P%,.2f%n", "Phone Allowance", phoneAllowance);
+        System.out.printf("%-30s: P%,.2f%n", "Clothing Allowance", clothingAllowance);
+        System.out.printf("%-30s: P%,.2f%n", "Total Benefits", totalBenefits);
+
+        // Print Summary Section
+        System.out.println("\nSUMMARY:");
+        System.out.printf("%-30s: P%,.2f%n", "Gross Income", grossIncome);
+        System.out.printf("%-30s: P%,.2f%n", "Total Benefits", totalBenefits);
+        System.out.printf("%-30s: P%,.2f%n", "Total Deduction", totalDeduction);
+        System.out.printf("%-30s: P%,.2f%n", "Take-Home Pay", takeHomePay);
     }
 
     public static double calculateWHTax(double taxableMonthlyPay) {
