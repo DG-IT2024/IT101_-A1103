@@ -546,33 +546,12 @@ public class MotorPH_A1103 {
         System.out.printf("%-30s: P%,.2f%n", "Take-Home Pay", takeHomePay);
     }
 
-    public static double calculateWHTax(double taxableMonthlyPay) {
-        double[] BIRincomeThresholds = {
-            20833,
-            33333,
-            66667,
-            166667,
-            666667,};
-
-        double[] BIRTaxRate = {0,
-            0.2 * (taxableMonthlyPay - BIRincomeThresholds[0]),
-            2500 + 0.25 * (taxableMonthlyPay - BIRincomeThresholds[1]),
-            10833 + 0.3 * (taxableMonthlyPay - BIRincomeThresholds[2]),
-            40833.33 + 0.32 * (taxableMonthlyPay - BIRincomeThresholds[3]),
-            200833.33 + 0.35 * (taxableMonthlyPay - BIRincomeThresholds[4]),};
-
-        double whTax = 0;
-        for (int i = 0; i < BIRincomeThresholds.length; i++) {
-            if (taxableMonthlyPay < BIRincomeThresholds[i]) {
-                whTax = BIRTaxRate[i];
-                break;
-            } else {
-                whTax = BIRTaxRate[i + 1];
-            }
+    public static void clearTerminal() {
+        for (int i = 0; i < 60; i++) {    //creates nexline 60
+            System.out.println("");
         }
-        return whTax;
     }
-
+    
     public static double calculateSSS(double basis) {
         ArrayList<Integer> sssSalary = new ArrayList<>();
         ArrayList<Double> sssContribution = new ArrayList<>();
@@ -627,6 +606,33 @@ public class MotorPH_A1103 {
         philHealth_ = Math.min(Math.max(philHealth, minValue), maxValue);
 
         return philHealth_;
+    }
+    
+    public static double calculateWHTax(double taxableMonthlyPay) {
+        double[] BIRincomeThresholds = {
+            20833,
+            33333,
+            66667,
+            166667,
+            666667,};
+
+        double[] BIRTaxRate = {0,
+            0.2 * (taxableMonthlyPay - BIRincomeThresholds[0]),
+            2500 + 0.25 * (taxableMonthlyPay - BIRincomeThresholds[1]),
+            10833 + 0.3 * (taxableMonthlyPay - BIRincomeThresholds[2]),
+            40833.33 + 0.32 * (taxableMonthlyPay - BIRincomeThresholds[3]),
+            200833.33 + 0.35 * (taxableMonthlyPay - BIRincomeThresholds[4]),};
+
+        double whTax = 0;
+        for (int i = 0; i < BIRincomeThresholds.length; i++) {
+            if (taxableMonthlyPay < BIRincomeThresholds[i]) {
+                whTax = BIRTaxRate[i];
+                break;
+            } else {
+                whTax = BIRTaxRate[i + 1];
+            }
+        }
+        return whTax;
     }
 
     //Methods below are for the database
@@ -1020,10 +1026,6 @@ public class MotorPH_A1103 {
 
     }
 
-    public static void clearTerminal() {
-        for (int i = 0; i < 60; i++) {    //creates nexline 60
-            System.out.println("");
-        }
-    }
+    
 
 }
