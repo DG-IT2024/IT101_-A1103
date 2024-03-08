@@ -3,25 +3,36 @@
 Author @dgiltendez 
 Group 5
 
-Input Notes:
+<Input Notes>
 Separate time entries with comma
 Write Time-In followed by Time-Out.
 Time should follow HH:mm format.
 Input 24-hour format
 
 
-Features and Limitations:
+<Limitations>
 12:00-13:00(BreakTime). not counted in computed worked hours
 Maximum regular paid hours is 8hours
 GrossIncome(Pay for hours worked) is used to determine the SSS, PhilHealth, Pag-ibig deductions
 Overtime is only computed if employee works for more than 8hours
 Overtime pay consideration. Available options: 1)Don't consider Overtime(rate set to 0) 2)Overtime Pay rate 
 This program computes for one month payroll. 
-Working days is 20days. Maximum days
+Working days is 20days for one month. Maximum days
 Work starts at 8:00AM
 Grace period of 10mins. Considered late if Time-in 8:11.
+Only consider worked hours per day. any fraction thereof is not considered in the payroll computation
 
- 
+
+<Features>
+Clear Console (limited to platforms that allows ANSI )
+Continuous proccessing of payroll
+TimeSheet is generated after encoding the TimeIn/TimeOut
+Compute the worked hours
+Regular and overtime hours separated 
+Allows setting of overtime rate per day
+Allow disregard the overtime if it is not approved
+Compute net salary based on worked hours, deductions and benefits
+
  */
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -46,40 +57,37 @@ public class MotorPH_A1103 {
             // Enter TimeIn/ TimeOut connected to WorkedDays Computation
             timeEntry(employeeNumber_, coveredDays, maxRegularHours);
 
-            // Clear console prompt
-            String response1;
+            //wrong input handling
+            String response;
             do {
-                System.out.println("\nDo you want to clear the terminal? (Y/N)");
-                response1 = entry.nextLine().trim().toLowerCase(); // remove whitespaces
-                if (!response1.equals("y") && !response1.equals("n")) {
-                    System.out.println("Invalid input. Please enter 'Y' or 'N'.");
+                System.out.println("\n---Select the next operation---");
+                System.out.println("A. Process Another Payroll.");
+                System.out.println("B. Clear the console Before Processing Another Payroll.");
+                System.out.println("C. Terminate Program.");
+                response = entry.nextLine().trim().toLowerCase(); // remove whitespaces
+                if (!response.equals("a") && !response.equals("b") && !response.equals("c")) {
+                    System.out.println("--- Error: Invalid input. Please choose from the available options.");
                 }
-            } while (!response1.equals("y") && !response1.equals("n"));
+            } while (!response.equals("a") && !response.equals("b") && !response.equals("c"));
 
-            if (response1.equals("y")) {
-                System.out.println("\033c"); // remove all the prior text (tested on command prompt)
-                clearTerminal(); //generates empty nextlines to hide the text
-                System.out.println("Console Cleared");
+            switch (response) {
+                case "a":       // Process Another Payroll.
+                    continue;
+                case "b":       //Clear the console
+                    System.out.println("\033c"); // remove all the prior text (tested on command prompt)
+                    clearTerminal(); //generates empty nextlines to hide the text
+                    System.out.println("Console Cleared");
+                    continue;
+                case "c":       //Terminate Program
+                    System.out.print("Terminating Program...");
+                    System.exit(0); //close java virtual machine
+                    break;
+                default:
+                    System.out.println("--- Error: Invalid input. Please choose from the available options.");
+
             }
-
-            // process new employee console prompt
-            String response2;
-            do {
-                System.out.println("\nDo you want to process another  payroll? (Y/N)");
-                response2 = entry.nextLine().trim().toLowerCase(); // remove whitespaces
-                if (!response2.equals("y") && !response2.equals("n")) {
-                    System.out.println("Invalid input. Please enter 'Y' or 'N'.");
-                }
-            } while (!response2.equals("y") && !response2.equals("n"));
-
-            if (!response2.equalsIgnoreCase("y")) {
-                System.out.print("Terminating Program...");
-                entry.close(); //close scanner
-                System.exit(0); //close java virtual machine
-                break;
-            }
-
         }
+
     }
 
     public static int employeeNoEntry(int coveredDays, int maxRegularHours) {
@@ -159,7 +167,7 @@ public class MotorPH_A1103 {
 
                 // check if timeIn and timeOut is in valid time format
                 String[] timeSheet = inputLine.split(",");
-               if (timeSheet.length != 2 || !isValidTimeFormat(timeSheet[0].trim()) || !isValidTimeFormat(timeSheet[1].trim())) {
+                if (timeSheet.length != 2 || !isValidTimeFormat(timeSheet[0].trim()) || !isValidTimeFormat(timeSheet[1].trim())) {
                     System.out.println("--- Error: Invalid input format. Please enter time in the correct format.---\n Example: 08:00,17:00 ");
                     i -= 1; //Repeat the loop at the same day
                     continue;
@@ -167,13 +175,13 @@ public class MotorPH_A1103 {
 
                 String timeIn = timeSheet[0].trim();
                 String timeOut = timeSheet[1].trim();
-               
+
                 //Error Handling for timeformat
                 try {
                     var parsedTimeIn = LocalTime.parse(timeIn); // Parse the TimeIN into a LocalTime object
                     var parsedTimeOut = LocalTime.parse(timeOut); // Parse the TimeOut into a LocalTime object
                 } catch (Exception e) {
-                    System.out.println("---Error parsing time: " + e.getMessage()+ ". Correct format: HH:mm. ---");
+                    System.out.println("---Error parsing time: " + e.getMessage() + ". Correct format: HH:mm. ---");
                     i -= 1; //Repeat the loop at the same day
                     continue;
                 }
@@ -199,7 +207,7 @@ public class MotorPH_A1103 {
                 overtimeRate_ = 0; // set to zero for no workedOvertimeHours
 
                 if (workedOvertimeHours > 0) {
-                    overtimeRate_ = overtimeRateInput(); // overtime pay rate prompt if there's computer overtime hours
+                    overtimeRate_ = overtimeRateInput(); // overtime pay rate prompt if there's computed overtime hours
                     if (overtimeRate_ == 0) {
                         workedOvertimeHours = 0; //If the overtime rate is set to 0, reset overtime hours to 0
                     }
@@ -407,8 +415,8 @@ public class MotorPH_A1103 {
         boolean checkValidformat = false;
         if (time.matches("\\d{2}:\\d{2}") || time.matches("([01]?[0-9]|2[0-3]):[0-5][0-9]")) {
             checkValidformat = true;
-            }
-        
+        }
+
         return checkValidformat;
     }
 
@@ -544,6 +552,7 @@ public class MotorPH_A1103 {
         System.out.printf("%-30s: P%,.2f%n", "Total Benefits", totalBenefits);
         System.out.printf("%-30s: P%,.2f%n", "Total Deduction", totalDeduction);
         System.out.printf("%-30s: P%,.2f%n", "Take-Home Pay", takeHomePay);
+
     }
 
     public static void clearTerminal() {
@@ -551,7 +560,7 @@ public class MotorPH_A1103 {
             System.out.println("");
         }
     }
-    
+
     public static double calculateSSS(double basis) {
         ArrayList<Integer> sssSalary = new ArrayList<>();
         ArrayList<Double> sssContribution = new ArrayList<>();
@@ -578,7 +587,6 @@ public class MotorPH_A1103 {
                 SSS_ = 1125.0;   // max contribution
             }
         }
-
         return SSS_;
     }
 
@@ -607,7 +615,7 @@ public class MotorPH_A1103 {
 
         return philHealth_;
     }
-    
+
     public static double calculateWHTax(double taxableMonthlyPay) {
         double[] BIRincomeThresholds = {
             20833,
@@ -1025,7 +1033,5 @@ public class MotorPH_A1103 {
         return employeeStatusDB_;
 
     }
-
-    
 
 }
