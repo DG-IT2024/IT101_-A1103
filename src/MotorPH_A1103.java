@@ -40,6 +40,14 @@ import java.util.Scanner;
 
 public class MotorPH_A1103 {
 
+     // Create array for timesheet     
+    private static final ArrayList<Integer> daysList = new ArrayList<>();
+    private static ArrayList<String> timeInList = new ArrayList<>();
+    private static ArrayList<String> timeOutList = new ArrayList<>();
+    private static ArrayList<Integer> regularHoursList = new ArrayList<>();
+    private static ArrayList<Integer> overtimeHoursList = new ArrayList<>();
+    private static ArrayList<Double> overtimeRateList = new ArrayList<>();
+     
     public static void main(String[] args) {
         int coveredDays;
         coveredDays = 20; //Set to maximum workings day in a month
@@ -56,6 +64,8 @@ public class MotorPH_A1103 {
 
             // Enter TimeIn/ TimeOut connected to WorkedDays Computation
             timeEntry(employeeNumber_, coveredDays, maxRegularHours);
+            
+            printTimeSheet(daysList, timeInList, timeOutList, regularHoursList, overtimeHoursList, overtimeRateList);
 
             //wrong input handling
             String response;
@@ -134,14 +144,14 @@ public class MotorPH_A1103 {
             int workedDays;
 
             double overtimeRate_;
-
-            // Create array for timesheet 
-            ArrayList<Integer> daysList = new ArrayList<>();
-            ArrayList<String> timeInList = new ArrayList<>();
-            ArrayList<String> timeOutList = new ArrayList<>();
-            ArrayList<Integer> regularHoursList = new ArrayList<>();
-            ArrayList<Integer> overtimeHoursList = new ArrayList<>();
-            ArrayList<Double> overtimeRateList = new ArrayList<>();
+            
+             // Clear previous entries
+            daysList.clear();
+            timeInList.clear();
+            timeOutList.clear();
+            regularHoursList.clear();
+            overtimeHoursList.clear();
+            overtimeRateList.clear();
 
             //Error Handling for workedDays Entry   
             try {
@@ -155,7 +165,7 @@ public class MotorPH_A1103 {
                 continue;
             }
 
-            if (workedDays <= 0) {
+            if (workedDays < 0) {
                 System.out.println("--- Error: Invalid input. No worked days to compute.");
                 continue;
             }
@@ -218,8 +228,6 @@ public class MotorPH_A1103 {
                 overtimeRateList.add(overtimeRate_);
 
             }
-
-            printTimeSheet(daysList, timeInList, timeOutList, regularHoursList, overtimeHoursList, overtimeRateList);
 
             processPayroll(employeeNumber_, maxRegularHours, workedDays, coveredDays, regularHoursList, overtimeHoursList, overtimeRateList);
             break;
@@ -555,6 +563,28 @@ public class MotorPH_A1103 {
 
     }
 
+    /*public static void printPaySlip(String LastName, String firstName) {
+        Scanner printOption = new Scanner(System.in);
+
+        String response;
+        do {
+            System.out.println("\nWould like to save the generated payslip to a textfile?(Yes/No)");
+            response = entry.nextLine().trim().toLowerCase(); // remove whitespaces
+            if (!response.equals("yes") && !response.equals("no")) {
+                System.out.println("--- Error: Invalid input. Please choose from the available options.");
+            }
+        } while (!response.equals("yes") && !response.equals("no"));
+
+        if (response.equals("yes")) {
+            String fileName = LastName + firstName +"_" +getCurrentDate()+"payroll.txt" 
+            System.out.println("Payroll is saved in  fileName");
+
+        }
+    }
+
+    }
+*/
+   
     public static void clearTerminal() {
         for (int i = 0; i < 60; i++) {    //creates nexline 60
             System.out.println("");
