@@ -24,6 +24,7 @@ Only consider worked hours per day. any fraction thereof is not considered in th
 
 
 <Features>
+Allows flexible Time In and Time Out
 Clear Console (limited to platforms that allows ANSI )
 Continuous proccessing of payroll
 TimeSheet is generated after encoding the TimeIn/TimeOut
@@ -316,16 +317,13 @@ public class MotorPH_A1103 {
         //Breaktime
         LocalTime breakStart = LocalTime.of(12, 0);//Set breaktime starts 12PM
         LocalTime breakEnd = LocalTime.of(13, 00);//Set breaktime ends before 1PM
-
-        //Exclude worked hour during breaktime
-        if (parsedTimeIn.isAfter(LocalTime.of(11, 59)) && parsedTimeIn.isBefore(breakEnd)) {
-            parsedTimeIn = breakEnd;
+        
+        //Exclude breaktime for counting time worked. 
+        if (parsedTimeIn.isBefore(breakStart) && parsedTimeOut.isBefore(LocalTime.of(12, 59))) { 
+            parsedTimeOut = breakStart;
         }
-
-        //Deduct Breaktime in the total worked hours
-        int breakTime = 0; // initialize breakTime
-        if (parsedTimeIn.isBefore(breakStart) && parsedTimeOut.isAfter(LocalTime.of(12, 59))) { //TimeIn during breaktime is not counted
-            breakTime = 1;
+        if (parsedTimeIn.isAfter(LocalTime.of(11, 59)) && parsedTimeOut.isAfter(breakEnd)) {
+            parsedTimeIn = breakEnd;
         }
 
         // Calculate the difference in minutes
@@ -336,6 +334,17 @@ public class MotorPH_A1103 {
 
         // Calculate the worked hours. only consider hours. paid by the hour.
         int workedHour = workedMinutes / 60;
+
+        //Deduct Breaktime in the total worked hours
+        int breakTime = 0; // initialize breakTime
+        if (parsedTimeIn.isBefore(breakStart) && parsedTimeOut.isAfter(LocalTime.of(12, 59))) { //TimeIn during breaktime is not counted
+            breakTime = 1;
+        }
+                
+         if (parsedTimeIn.equals(breakStart) && parsedTimeOut.equals(breakEnd)) { //TimeIn during breaktime is not counted
+            breakTime = 1;
+        }
+        
 
         int workedHour_ = workedHour - breakTime;
 
@@ -518,6 +527,7 @@ public class MotorPH_A1103 {
         System.out.printf("%-30s: %s%n", "Employee Position/ Department", employeePosition_);
         System.out.printf("%-30s: %d%n", "Employee Number", employeeNumber_);
         System.out.printf("%-30s: %s%n", "Cut-off Covered Days", coveredDays);
+        System.out.printf("%-30s: %s%n", "Maximum Hours Per Day", maxRegularHours);
 
         // Print Earnings Section
         System.out.println("\nEARNINGS:");
