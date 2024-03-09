@@ -186,7 +186,14 @@ public class MotorPH_A1103 {
                     i -= 1; //Repeat the loop at the same day
                     continue;
                 }
-
+                
+                if (timeSheet.length != 2 || !isValidTimeFormat(timeSheet[0].trim()) || !isValidTimeFormat(timeSheet[1].trim())) {
+                    System.out.println("--- Error: Invalid input format. Please enter time in the correct format.---\n Example: 08:00,17:00 ");
+                    i -= 1; //Repeat the loop at the same day
+                    continue;
+                }
+                
+                             
                 daysList.add(i); // append days to daysList
                 timeInList.add(timeIn);// append days to timeInList
                 timeOutList.add(timeOut);// append days to timeOutList
@@ -345,7 +352,6 @@ public class MotorPH_A1103 {
             breakTime = 1;
         }
         
-
         int workedHour_ = workedHour - breakTime;
 
         return workedHour_;
