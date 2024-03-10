@@ -61,10 +61,10 @@ public class MotorPH_A1103 {
             //wrong input handling
             String response;
             do {
-                System.out.println("\n---Select the next operation---");
-                System.out.println("A. Process Another Payroll.");
-                System.out.println("B. Clear the console Before Processing Another Payroll.");
-                System.out.println("C. Terminate Program.");
+                System.out.println("\n--- Select the next operation ---");
+                System.out.println("A  < Process Another Payroll >");
+                System.out.println("B  < Clear the console Before Processing Another Payroll >");
+                System.out.println("C  < Terminate Program >");
                 response = entry.nextLine().trim().toLowerCase(); // remove whitespaces
                 if (!response.equals("a") && !response.equals("b") && !response.equals("c")) {
                     System.out.println("--- Error: Invalid input. Please choose from the available options.");
