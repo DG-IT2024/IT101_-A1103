@@ -4,7 +4,7 @@ MotorPH Project
 The program will calculate the payroll based on the number of hours worked by an employee. You will be asked to provide the employee number, and time IN and time Out. 
 
 
-**<Input Notes>
+**Input Notes
 Separate time entries with comma
 Write Time-In followed by Time-Out.
 Time should follow HH:mm format.
