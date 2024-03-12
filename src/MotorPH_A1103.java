@@ -1,40 +1,49 @@
 
 /*
-Author @dgiltendez 
 Group 5
 
-<Input Notes>
-Separate time entries with comma
-Write Time-In followed by Time-Out.
-Time should follow HH:mm format.
-Input 24-hour format
+# IT101_-A1103
+MotorPH Project
 
+The program will calculate the payroll based on the number of hours worked by an employee. You will be asked to provide the employee number, and time IN and time Out. 
 
-<Limitations>
-12:00-13:00(BreakTime). not counted in computed worked hours
-Maximum regular paid hours is 8hours
-GrossIncome(Pay for hours worked) is used to determine the SSS, PhilHealth, Pag-ibig deductions
-Overtime is only computed if employee works for more than 8hours
-Overtime pay consideration. Available options: 1)Don't consider Overtime(rate set to 0) 2)Overtime Pay rate 
-This program computes for one month payroll. 
-Working days is 20days for one month. Maximum days
-Work starts at 8:00AM
-Grace period of 10mins. Considered late if Time-in 8:11.
-Only consider worked hours per day. any fraction thereof is not considered in the payroll computation
+**Input Notes**
+- Separate time entries with comma
+- Write Time-In followed by Time-Out.
+- Time should follow HH:mm format.
+- Input time in 24-hour format
 
+**Limitations**
+- 12:00-13:00 (BreakTime). Not counted in computed worked hours
+- Maximum regular paid hours is 8 hours
+- Maximum worked days is 20days for one month.
+- Hourly rate is the quotient of BasicSalary divided by the product of maximum regulars hours (8) and maximum worked days(20). 
+- Gross Income (Pay for hours worked) is used to determine the SSS, PhilHealth, Pag-ibig deductions
+- Overtime is only computed if employee works for more than 8 hours
+- Overtime pay consideration.
+Options:
+  1. Don't credit overtime (rate set to 0)
+  2. Set overtime pay rate(e.g. 1.25)
+- Program computes for one month payroll.
+- Work starts at 8:00AM
+- Grace period of 10 mins. Considered late if Time-in 8:11.
+- Only consider worked hours per day. Any fraction thereof is not considered in the payroll computation
 
-<Features>
-Allows flexible Time In and Time Out
-Clear Console (limited to platforms that allows ANSI )
-Continuous proccessing of payroll
-TimeSheet is generated after encoding the TimeIn/TimeOut
-Compute the worked hours
-Regular and overtime hours separated 
-Allows setting of overtime rate per day
-Allow disregard the overtime if it is not approved
-Compute net salary based on worked hours, deductions and benefits
+**Features**
+- Clear Console (limited to platforms that allow ANSI. Generates newline after ANSI)
+- Continuous processing of payroll
+- TimeSheet is generated after encoding all the Time-In/Time-Out for the month
+- Computed regular and overtime worked hours are shown after each Time-In/Time-Out entry
+- Allows setting of overtime rate per day
+- Option to disregard overtime if it is not approved
+- Calculate overtime hours
+- Calculate regular hours
+- Calculate SSS, Pag-ibig, Philhealth, and Withholding tax
+- Calculate net salary based on worked hours, deductions, and benefits
+- Generate payslip after getting the employee number and timesheet
 
  */
+
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -442,7 +451,7 @@ public class MotorPH_A1103 {
             ArrayList<Double> overtimeRateList) {
 
         //print format
-        System.out.printf("\n\n%" + (55 + "x x x x x x x TIMESHEETx x x x x x x".length()) / 2 + "s%n", "x x x x x x x TIMESHEETx x x x x x x\n");
+        System.out.printf("\n\n%" + (55 + "x x x x x x x TIMESHEET x x x x x x x".length()) / 2 + "s%n", "x x x x x x x TIMESHEETx x x x x x x\n");
         System.out.printf("%-5s%-12s%-12s%-14s%-12s%-19s\n", "Day", "Time-In", "Time-Out", "Worked Hour", "Overtime", "Overtime Rate");
         for (int i = 0; i < daysList.size(); i++) {
             System.out.printf("%-5d%-12s%-12s%-14d%-12d%-19.2f\n", daysList.get(i), timeInList.get(i), timeOutList.get(i), regularHoursList.get(i), overtimeHoursList.get(i), overtimeRateList.get(i));
