@@ -11,16 +11,16 @@ The program will calculate the payroll based on the number of hours worked by an
 
 **Limitations**
 
-- 12:00-13:00 (BreakTime)**
-- Not counted in computed worked hours
+- 12:00-13:00 (BreakTime). Not counted in computed worked hours
 - Maximum regular paid hours is 8 hours
 - Gross Income (Pay for hours worked) is used to determine the SSS, PhilHealth, Pag-ibig deductions
 - Overtime is only computed if employee works for more than 8 hours
-- Overtime pay consideration. Available options:
+- Overtime pay consideration.
+ options:
   1. Don't consider Overtime (rate set to 0)
-  2. Overtime Pay rate
-- This program computes for one month payroll.
-- Working days is 20 days for one month.
+  2. Set overtime Pay rate(e.g. 1.25)
+- Program computes for one month payroll.
+- Maximum Working-days is 20days for one month.
 - Maximum days Work starts at 8:00 AM
 - Grace period of 10 mins. Considered late if Time-in 8:11.
 - Only consider worked hours per day. Any fraction thereof is not considered in the payroll computation
