@@ -5,10 +5,10 @@ The program will calculate the payroll based on the number of hours worked by an
 
 
 **Input Notes
-Separate time entries with comma
-Write Time-In followed by Time-Out.
-Time should follow HH:mm format.
-Input 24-hour format
+-Separate time entries with comma
+-Write Time-In followed by Time-Out.
+-Time should follow HH:mm format.
+-Input 24-hour format
 
 **<Limitations>
 12:00-13:00(BreakTime). not counted in computed worked hours
