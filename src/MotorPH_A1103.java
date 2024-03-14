@@ -65,11 +65,10 @@ public class MotorPH_A1103 {
             // Read 'EmployeeList.txt' file that contains list of MotorPH employees 
             String filePath = "Employeelist.txt";
             try {
-                System.out.println("\nHere's the list of MotorPH employees: \n");
+                System.out.println("\nList of MotorPH employees: \n");
 
                 List<String> lines = Files.readAllLines(Paths.get(filePath));
-                
-                System.out.println(lines);
+
                 for (String line : lines) {
                     System.out.println(line);
                 }
