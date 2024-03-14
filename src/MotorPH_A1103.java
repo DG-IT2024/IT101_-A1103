@@ -406,6 +406,14 @@ public class MotorPH_A1103 {
 
         return totalOvertimeHour;
     }
+    
+     public static void regularOvertimeView(int workedregularHours, int workedOvertimeHours) {
+
+        System.out.println("-".repeat(55));
+        System.out.println("Regular Hours : " + workedregularHours);
+        System.out.println("Overtime Hours : " + workedOvertimeHours);
+        System.out.println("-".repeat(55));
+    }
 
     public static double overtimeRateInput() {
 
@@ -445,14 +453,6 @@ public class MotorPH_A1103 {
             overtimeHourPay += overtimeHoursList.get(i) * overtimeRateList.get(i);//sum of  weighted Overtime   }
         }
         return overtimeHourPay;
-    }
-
-    public static void regularOvertimeView(int workedregularHours, int workedOvertimeHours) {
-
-        System.out.println("-".repeat(55));
-        System.out.println("Regular Hours : " + workedregularHours);
-        System.out.println("Overtime Hours : " + workedOvertimeHours);
-        System.out.println("-".repeat(55));
     }
 
     public static boolean isValidTimeFormat(String time) {
