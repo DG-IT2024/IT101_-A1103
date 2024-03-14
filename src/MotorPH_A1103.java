@@ -43,9 +43,12 @@ Options:
 - Generate payslip after getting the employee number and timesheet
 
  */
-
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.io.IOException;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class MotorPH_A1103 {
@@ -58,6 +61,21 @@ public class MotorPH_A1103 {
         maxRegularHours = 8; //Set to maximum regular hours in a day
 
         while (true) {
+
+            // Read 'EmployeeList.txt' file that contains list of MotorPH employees 
+            String filePath = "Employeelist.txt";
+            try {
+                System.out.println("\nHere's the list of MotorPH employees: \n");
+
+                List<String> lines = Files.readAllLines(Paths.get(filePath));
+                
+                System.out.println(lines);
+                for (String line : lines) {
+                    System.out.println(line);
+                }
+            } catch (IOException e) {
+                System.err.println("--- Error: File 'Employeelist.txt' not found ");
+            }
 
             Scanner entry = new Scanner(System.in);
 
@@ -195,14 +213,13 @@ public class MotorPH_A1103 {
                     i -= 1; //Repeat the loop at the same day
                     continue;
                 }
-                
+
                 if (timeSheet.length != 2 || !isValidTimeFormat(timeSheet[0].trim()) || !isValidTimeFormat(timeSheet[1].trim())) {
                     System.out.println("--- Error: Invalid input format. Please enter time in the correct format.---\n Example: 08:00,17:00 ");
                     i -= 1; //Repeat the loop at the same day
                     continue;
                 }
-                
-                             
+
                 daysList.add(i); // append days to daysList
                 timeInList.add(timeIn);// append days to timeInList
                 timeOutList.add(timeOut);// append days to timeOutList
@@ -333,9 +350,9 @@ public class MotorPH_A1103 {
         //Breaktime
         LocalTime breakStart = LocalTime.of(12, 0);//Set breaktime starts 12PM
         LocalTime breakEnd = LocalTime.of(13, 00);//Set breaktime ends before 1PM
-        
+
         //Exclude breaktime for counting time worked. 
-        if (parsedTimeIn.isBefore(breakStart) && parsedTimeOut.isBefore(LocalTime.of(12, 59))) { 
+        if (parsedTimeIn.isBefore(breakStart) && parsedTimeOut.isBefore(LocalTime.of(12, 59))) {
             parsedTimeOut = breakStart;
         }
         if (parsedTimeIn.isAfter(LocalTime.of(11, 59)) && parsedTimeOut.isAfter(breakEnd)) {
@@ -356,11 +373,11 @@ public class MotorPH_A1103 {
         if (parsedTimeIn.isBefore(breakStart) && parsedTimeOut.isAfter(LocalTime.of(12, 59))) { //TimeIn during breaktime is not counted
             breakTime = 1;
         }
-                
-         if (parsedTimeIn.equals(breakStart) && parsedTimeOut.equals(breakEnd)) { //TimeIn during breaktime is not counted
+
+        if (parsedTimeIn.equals(breakStart) && parsedTimeOut.equals(breakEnd)) { //TimeIn during breaktime is not counted
             breakTime = 1;
         }
-        
+
         int workedHour_ = workedHour - breakTime;
 
         return workedHour_;
