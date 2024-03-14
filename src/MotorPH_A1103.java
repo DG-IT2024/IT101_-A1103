@@ -63,18 +63,7 @@ public class MotorPH_A1103 {
         while (true) {
 
             // Read 'EmployeeList.txt' file that contains list of MotorPH employees 
-            String filePath = "Employeelist.txt";
-            try {
-                System.out.println("\nList of MotorPH employees: \n");
-
-                List<String> lines = Files.readAllLines(Paths.get(filePath));
-
-                for (String line : lines) {
-                    System.out.println(line);
-                }
-            } catch (IOException e) {
-                System.err.println("--- Error: File 'Employeelist.txt' not found ");
-            }
+            fileEmployeeList();
 
             Scanner entry = new Scanner(System.in);
 
@@ -117,6 +106,21 @@ public class MotorPH_A1103 {
 
     }
 
+    public static void fileEmployeeList() {
+        String filePath = "Employeelist.txt";
+        try {
+            System.out.println("\nList of MotorPH employees: \n");
+
+            List<String> lines = Files.readAllLines(Paths.get(filePath));
+
+            for (String line : lines) {
+                System.out.println(line);
+            }
+        } catch (IOException e) {
+            System.err.println("--- Error: File 'Employeelist.txt' not found ");
+        }
+    }
+
     public static int employeeNoEntry(int coveredDays, int maxRegularHours) {
 
         Scanner employeeNoEntry = new Scanner(System.in);
@@ -145,6 +149,74 @@ public class MotorPH_A1103 {
             }
 
         }
+
+    }
+
+    public static void employeeInformation(int employeeNumber_, int coveredDays, int maxRegularHours) {
+        String lastName;
+        String firstName;
+        String birthday;
+        String address;
+        String phoneNumber;
+        String sssNumber;
+        String philhealthNo;
+        String tinNo;
+        String pagibig;
+        String status;
+        String position;
+        String immediateSupervisor;
+        double basicSalary;
+        double riceSubsidy;
+        double phoneAllowance;
+        double clothingAllowance;
+        double grossSemiMonthlyRate;
+        double hourlyRate;
+        int index_;
+
+        index_ = employeeNumber_ - 1;
+        lastName = employeeNameDB(index_).get(0);
+        firstName = employeeNameDB(index_).get(1);
+        birthday = birthdayDB(index_);
+        address = addressDB(index_);
+        phoneNumber = phoneNumberDB(index_);
+        sssNumber = sssNumberDB(index_);
+        philhealthNo = philhealthNoDB(index_);
+        tinNo = tinNoDB(index_);
+        pagibig = pagibigDB(index_);
+        status = employeeStatusDB(index_);
+        position = employeePositionDB(index_);
+        immediateSupervisor = immediateSupervisorsDB(index_);
+        basicSalary = basicSalaryDB(index_);
+        riceSubsidy = riceSubsidyDB(index_);
+        phoneAllowance = phoneAllowanceDB(index_);
+        clothingAllowance = clothingAllowanceDB(index_);
+        grossSemiMonthlyRate = basicSalary / 2;
+        hourlyRate = basicSalary / (coveredDays * maxRegularHours);
+
+        //Print All information of the Employee
+        System.out.println("");
+        System.out.printf("%" + (55 + "EMPLOYEE INFORMATION".length()) / 2 + "s%n", "EMPLOYEE INFORMATION");
+        System.out.println("-".repeat(55));
+        System.out.printf("%-30s: %s%n", "Employee No.", employeeNumber_);
+        System.out.printf("%-30s: %s%n", "Last Name", lastName);
+        System.out.printf("%-30s: %s%n", "First Name", firstName);
+        System.out.printf("%-30s: %s%n", "Birthday", birthday);
+        System.out.printf("%-30s: %s%n", "Address", address);
+        System.out.printf("%-30s: %s%n", "Phone Number", phoneNumber);
+        System.out.printf("%-30s: %s%n", "SSS Number", sssNumber);
+        System.out.printf("%-30s: %s%n", "Philhealth Number", philhealthNo);
+        System.out.printf("%-30s: %s%n", "TIN Number", tinNo);
+        System.out.printf("%-30s: %s%n", "Pag-ibig Number", pagibig);
+        System.out.printf("%-30s: %s%n", "Status", status);
+        System.out.printf("%-30s: %s%n", "Position", position);
+        System.out.printf("%-30s: %s%n", "Immediate Supervisor", immediateSupervisor);
+        System.out.printf("%-30s: P%,.2f%n", "Basic Salary", basicSalary);
+        System.out.printf("%-30s: P%,.2f%n", "Rice Subsidy", riceSubsidy);
+        System.out.printf("%-30s: P%,.2f%n", "Phone Allowance", phoneAllowance);
+        System.out.printf("%-30s: P%,.2f%n", "Clothing Allowance", clothingAllowance);
+        System.out.printf("%-30s: P%,.2f%n", "Gross Semi-monthly Rate", grossSemiMonthlyRate);
+        System.out.printf("%-30s: P%,.2f%n", "Hourly Rate", hourlyRate);
+        System.out.println("-".repeat(55));
 
     }
 
@@ -257,74 +329,6 @@ public class MotorPH_A1103 {
             processPayroll(employeeNumber_, maxRegularHours, workedDays, coveredDays, regularHoursList, overtimeHoursList, overtimeRateList);
             break;
         }
-
-    }
-
-    public static void employeeInformation(int employeeNumber_, int coveredDays, int maxRegularHours) {
-        String lastName;
-        String firstName;
-        String birthday;
-        String address;
-        String phoneNumber;
-        String sssNumber;
-        String philhealthNo;
-        String tinNo;
-        String pagibig;
-        String status;
-        String position;
-        String immediateSupervisor;
-        double basicSalary;
-        double riceSubsidy;
-        double phoneAllowance;
-        double clothingAllowance;
-        double grossSemiMonthlyRate;
-        double hourlyRate;
-        int index_;
-
-        index_ = employeeNumber_ - 1;
-        lastName = employeeNameDB(index_).get(0);
-        firstName = employeeNameDB(index_).get(1);
-        birthday = birthdayDB(index_);
-        address = addressDB(index_);
-        phoneNumber = phoneNumberDB(index_);
-        sssNumber = sssNumberDB(index_);
-        philhealthNo = philhealthNoDB(index_);
-        tinNo = tinNoDB(index_);
-        pagibig = pagibigDB(index_);
-        status = employeeStatusDB(index_);
-        position = employeePositionDB(index_);
-        immediateSupervisor = immediateSupervisorsDB(index_);
-        basicSalary = basicSalaryDB(index_);
-        riceSubsidy = riceSubsidyDB(index_);
-        phoneAllowance = phoneAllowanceDB(index_);
-        clothingAllowance = clothingAllowanceDB(index_);
-        grossSemiMonthlyRate = basicSalary / 2;
-        hourlyRate = basicSalary / (coveredDays * maxRegularHours);
-
-        //Print All information of the Employee
-        System.out.println("");
-        System.out.printf("%" + (55 + "EMPLOYEE INFORMATION".length()) / 2 + "s%n", "EMPLOYEE INFORMATION");
-        System.out.println("-".repeat(55));
-        System.out.printf("%-30s: %s%n", "Employee No.", employeeNumber_);
-        System.out.printf("%-30s: %s%n", "Last Name", lastName);
-        System.out.printf("%-30s: %s%n", "First Name", firstName);
-        System.out.printf("%-30s: %s%n", "Birthday", birthday);
-        System.out.printf("%-30s: %s%n", "Address", address);
-        System.out.printf("%-30s: %s%n", "Phone Number", phoneNumber);
-        System.out.printf("%-30s: %s%n", "SSS Number", sssNumber);
-        System.out.printf("%-30s: %s%n", "Philhealth Number", philhealthNo);
-        System.out.printf("%-30s: %s%n", "TIN Number", tinNo);
-        System.out.printf("%-30s: %s%n", "Pag-ibig Number", pagibig);
-        System.out.printf("%-30s: %s%n", "Status", status);
-        System.out.printf("%-30s: %s%n", "Position", position);
-        System.out.printf("%-30s: %s%n", "Immediate Supervisor", immediateSupervisor);
-        System.out.printf("%-30s: P%,.2f%n", "Basic Salary", basicSalary);
-        System.out.printf("%-30s: P%,.2f%n", "Rice Subsidy", riceSubsidy);
-        System.out.printf("%-30s: P%,.2f%n", "Phone Allowance", phoneAllowance);
-        System.out.printf("%-30s: P%,.2f%n", "Clothing Allowance", clothingAllowance);
-        System.out.printf("%-30s: P%,.2f%n", "Gross Semi-monthly Rate", grossSemiMonthlyRate);
-        System.out.printf("%-30s: P%,.2f%n", "Hourly Rate", hourlyRate);
-        System.out.println("-".repeat(55));
 
     }
 
